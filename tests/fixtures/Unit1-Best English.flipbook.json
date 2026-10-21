@@ -1,0 +1,471 @@
+{
+  "version": "1.0",
+  "savedAt": "2026-10-01T16:04:13.633Z",
+  "title": "Best English Unit 1",
+  "subtitle": "",
+  "pdf_path": "C:\\Users\\SPIRIT\\Downloads\\flip book\\uploaded_pdfs\\Unit1-Best English.pdf",
+  "output_dir": "D:\\2026-2027\\flip book VF",
+  "dpi": 300,
+  "totalPages": 40,
+  "pages": [
+    {
+      "pageNumber": 1,
+      "title": "Page 1",
+      "ambientAudio": "",
+      "interactions": []
+    },
+    {
+      "pageNumber": 2,
+      "title": "Page 2",
+      "ambientAudio": "",
+      "interactions": []
+    },
+    {
+      "pageNumber": 3,
+      "title": "Page 3",
+      "ambientAudio": "",
+      "interactions": []
+    },
+    {
+      "pageNumber": 4,
+      "title": "Page 4",
+      "ambientAudio": "",
+      "interactions": []
+    },
+    {
+      "pageNumber": 5,
+      "title": "Page 5",
+      "ambientAudio": "",
+      "interactions": []
+    },
+    {
+      "pageNumber": 6,
+      "title": "Page 6",
+      "ambientAudio": "",
+      "interactions": []
+    },
+    {
+      "pageNumber": 7,
+      "title": "Page 7",
+      "ambientAudio": "",
+      "interactions": []
+    },
+    {
+      "pageNumber": 8,
+      "title": "Page 8",
+      "ambientAudio": "",
+      "interactions": [
+        {
+          "id": "tts-8-9762",
+          "type": "tts",
+          "title": "Lecture 1",
+          "text": "Danny loves riding his bike and playing computer games. He hates visiting museums becausehe thinks they are just old rooms full of old things – so boring! He doesn’t likegoing camping because he hates sleeping on the ground – it is cold, wet andhard. He loves sleeping in his nice, warm bed.Beth likes playing football. She really loves scoring goals! She also likesgoing swimming because she has a lot of friends at the local sports club.She enjoys flying her kite in the park, and Alfie loves chasing it. She doesn’tlike fishing because she loves animals and thinks it hurts the fish. She hates boardgames, too, because she thinks they are boring.Mr and Mrs Carter are very different. Dad is fond of fishing with Sam, hisneighbour, and he enjoys going to museums and art galleries with MrsCarter. They like spending time together. They also like taking sandwichesfor a picnic and sitting outside the museum by a beautiful fountain.Mrs Carter enjoys gardening, and she is fond of bees and beekeeping becauseshe loves honey. She likes watching sport on TV. She really loves watchingthe Olympics and the Winter Olympics. Like Danny, she also hates campingbecause she is very fond of feeling cosy in bed with a warm blanket.Eric and Ernie love flying around the house and making a mess. The Carterfamily never knows what the two birds do when nobody is watching!",
+          "lang": "en-GB",
+          "karaoke": false,
+          "x": "5%",
+          "y": "34.1%",
+          "size": 26
+        }
+      ]
+    },
+    {
+      "pageNumber": 9,
+      "title": "Page 9",
+      "ambientAudio": "",
+      "interactions": []
+    },
+    {
+      "pageNumber": 10,
+      "title": "Page 10",
+      "ambientAudio": "",
+      "interactions": []
+    },
+    {
+      "pageNumber": 11,
+      "title": "Page 11",
+      "ambientAudio": "",
+      "interactions": []
+    },
+    {
+      "pageNumber": 12,
+      "title": "Page 12",
+      "ambientAudio": "",
+      "interactions": [
+        {
+          "id": "modal-12-1897",
+          "type": "modal",
+          "title": "Zoom HD 1",
+          "imageSrc": "",
+          "x": "10.7%",
+          "y": "14.6%",
+          "width": "73.3%",
+          "height": "28.8%"
+        },
+        {
+          "id": "modal-12-0921",
+          "type": "modal",
+          "title": "Zoom HD 2",
+          "imageSrc": "",
+          "x": "10.9%",
+          "y": "43.5%",
+          "width": "77.2%",
+          "height": "20.4%"
+        }
+      ]
+    },
+    {
+      "pageNumber": 13,
+      "title": "Page 13",
+      "ambientAudio": "",
+      "interactions": [
+        {
+          "id": "modal-13-3121",
+          "type": "modal",
+          "title": "Zoom HD 1",
+          "imageSrc": "",
+          "x": "9.4%",
+          "y": "32.2%",
+          "width": "72%",
+          "height": "12.7%"
+        },
+        {
+          "id": "modal-13-8201",
+          "type": "modal",
+          "title": "Zoom HD 2",
+          "imageSrc": "",
+          "x": "8.5%",
+          "y": "63.7%",
+          "width": "72.2%",
+          "height": "12.7%"
+        }
+      ]
+    },
+    {
+      "pageNumber": 14,
+      "title": "Page 14",
+      "ambientAudio": "",
+      "interactions": [
+        {
+          "id": "modal-14-4449",
+          "type": "modal",
+          "title": "Zoom HD 1",
+          "imageSrc": "",
+          "x": "10.9%",
+          "y": "5.5%",
+          "width": "75.7%",
+          "height": "19.8%"
+        }
+      ]
+    },
+    {
+      "pageNumber": 15,
+      "title": "Page 15",
+      "ambientAudio": "",
+      "interactions": [
+        {
+          "id": "modal-15-4994",
+          "type": "modal",
+          "title": "Zoom HD 1",
+          "imageSrc": "",
+          "x": "9.4%",
+          "y": "7.5%",
+          "width": "74.4%",
+          "height": "31.9%"
+        }
+      ]
+    },
+    {
+      "pageNumber": 16,
+      "title": "Page 16",
+      "ambientAudio": "",
+      "interactions": [
+        {
+          "id": "tts-16-8049",
+          "type": "tts",
+          "title": "Lecture 1",
+          "text": "Mum is a very good artist. She usually draws in the evenings after dinner. She draws funnycartoons of the pets, and she often draws pictures of Alfie and Sybil. She always listens topodcasts on her phone. She walks around the house and the garden with her headphones on.Her favourite podcasts are about sports, health and travel.Dad usually goes shopping on Saturday mornings. He never enjoys it, but he always hasa cappuccino and a cake in the supermarket café. In his free time, he often tries to paint.He is not very good. Heoccasionally shows his paintings to Mrs Carter. She smiles andshe never says they are bad! Danny sometimes goeswith Mr Carter to the shops, but only because hegets a chocolate milkshake in the café!Danny loves reading manga comics. He usuallydraws his own manga comics in his bedroom. Healways shows Beth because she usually asks tobe a superhero in his stories. Occasionally, sheasks to be the bad character. Beth lovesreading, too. She always reads in bed atnight. She occasionally reads very lateand Mum tells her to sleep. They don’t likereading at school because there are tests,but at home they read the books they like.",
+          "lang": "en-US",
+          "karaoke": false,
+          "x": "5%",
+          "y": "32%",
+          "size": 26
+        },
+        {
+          "id": "modal-16-1041",
+          "type": "modal",
+          "title": "Zoom HD 1",
+          "imageSrc": "",
+          "x": "9.6%",
+          "y": "52.3%",
+          "width": "45.5%",
+          "height": "37.2%"
+        }
+      ]
+    },
+    {
+      "pageNumber": 17,
+      "title": "Page 17",
+      "ambientAudio": "",
+      "interactions": []
+    },
+    {
+      "pageNumber": 18,
+      "title": "Page 18",
+      "ambientAudio": "",
+      "interactions": []
+    },
+    {
+      "pageNumber": 19,
+      "title": "Page 19",
+      "ambientAudio": "",
+      "interactions": []
+    },
+    {
+      "pageNumber": 20,
+      "title": "Page 20",
+      "ambientAudio": "",
+      "interactions": [
+        {
+          "id": "modal-20-2105",
+          "type": "modal",
+          "title": "Zoom HD 1",
+          "imageSrc": "",
+          "x": "7.6%",
+          "y": "23.2%",
+          "width": "85.8%",
+          "height": "21.8%"
+        },
+        {
+          "id": "modal-20-9153",
+          "type": "modal",
+          "title": "Zoom HD 2",
+          "imageSrc": "",
+          "x": "6.8%",
+          "y": "45%",
+          "width": "85.8%",
+          "height": "22.3%"
+        }
+      ]
+    },
+    {
+      "pageNumber": 21,
+      "title": "Page 21",
+      "ambientAudio": "",
+      "interactions": []
+    },
+    {
+      "pageNumber": 22,
+      "title": "Page 22",
+      "ambientAudio": "",
+      "interactions": [
+        {
+          "id": "tts-22-5273",
+          "type": "tts",
+          "title": "Lecture 1",
+          "text": "It is Saturday and the Carter family are getting ready for a picnic in the countryside. Mr andMrs Carter are preparing the picnic. Mum is making yummy sandwiches and packing orangejuice, pizza and fruit - grapes, bananas and oranges. Dad is cleaning the cups and plates andthen he’s going to put them in the picnic basket.Beth and Danny are gathering their things. Beth is packing her kite and her skipping rope.Danny is packing his comics and a few sweets. Mum finds them and decides to hide them inher bag for later.Alfie is very excited. He loves the countryside. He is running around the kitchen and jumpson the picnic basket. He’s already hungry! Sybil is sitting on Mum’s nice jacket and is about togo to sleep. The parrots are watching the picnic preparation and shout, “Let’s go on a picnic!”It’s a lovely, sunny day as the Carters drive in the country.They arrive at a nice place. They have thepicnic under a big tree by the river. Theyeat everything. Beth flies her kiteand Alfie chases it. Then, Dannylooks in his bag. His sweets arenot there! Mum smiles and givesthe sweets to Danny. “Here youare. Remember to share them!”",
+          "lang": "en-GB",
+          "karaoke": false,
+          "x": "5%",
+          "y": "32.4%",
+          "size": 26
+        },
+        {
+          "id": "modal-22-6553",
+          "type": "modal",
+          "title": "Zoom HD 1",
+          "imageSrc": "",
+          "x": "39.3%",
+          "y": "61.9%",
+          "width": "53.5%",
+          "height": "26.5%"
+        }
+      ]
+    },
+    {
+      "pageNumber": 23,
+      "title": "Page 23",
+      "ambientAudio": "",
+      "interactions": []
+    },
+    {
+      "pageNumber": 24,
+      "title": "Page 24",
+      "ambientAudio": "",
+      "interactions": [
+        {
+          "id": "modal-24-3433",
+          "type": "modal",
+          "title": "Zoom HD 1",
+          "imageSrc": "",
+          "x": "11.5%",
+          "y": "77.1%",
+          "width": "30.4%",
+          "height": "18.8%"
+        }
+      ]
+    },
+    {
+      "pageNumber": 25,
+      "title": "Page 25",
+      "ambientAudio": "",
+      "interactions": []
+    },
+    {
+      "pageNumber": 26,
+      "title": "Page 26",
+      "ambientAudio": "",
+      "interactions": [
+        {
+          "id": "modal-26-1337",
+          "type": "modal",
+          "title": "Zoom HD 1",
+          "imageSrc": "",
+          "x": "11.1%",
+          "y": "21.8%",
+          "width": "81.7%",
+          "height": "15.1%"
+        },
+        {
+          "id": "modal-26-7769",
+          "type": "modal",
+          "title": "Zoom HD 2",
+          "imageSrc": "",
+          "x": "10.2%",
+          "y": "37.2%",
+          "width": "82.4%",
+          "height": "30.6%"
+        }
+      ]
+    },
+    {
+      "pageNumber": 27,
+      "title": "Page 27",
+      "ambientAudio": "",
+      "interactions": [
+        {
+          "id": "modal-27-7361",
+          "type": "modal",
+          "title": "Zoom HD 1",
+          "imageSrc": "",
+          "x": "9.6%",
+          "y": "6.1%",
+          "width": "82.6%",
+          "height": "22.1%"
+        }
+      ]
+    },
+    {
+      "pageNumber": 28,
+      "title": "Page 28",
+      "ambientAudio": "",
+      "interactions": []
+    },
+    {
+      "pageNumber": 29,
+      "title": "Page 29",
+      "ambientAudio": "",
+      "interactions": []
+    },
+    {
+      "pageNumber": 30,
+      "title": "Page 30",
+      "ambientAudio": "",
+      "interactions": []
+    },
+    {
+      "pageNumber": 31,
+      "title": "Page 31",
+      "ambientAudio": "",
+      "interactions": []
+    },
+    {
+      "pageNumber": 32,
+      "title": "Page 32",
+      "ambientAudio": "",
+      "interactions": []
+    },
+    {
+      "pageNumber": 33,
+      "title": "Page 33",
+      "ambientAudio": "",
+      "interactions": []
+    },
+    {
+      "pageNumber": 34,
+      "title": "Page 34",
+      "ambientAudio": "",
+      "interactions": [
+        {
+          "id": "modal-34-5065",
+          "type": "modal",
+          "title": "Zoom HD 1",
+          "imageSrc": "",
+          "x": "10.4%",
+          "y": "17.1%",
+          "width": "77.8%",
+          "height": "36.6%"
+        }
+      ]
+    },
+    {
+      "pageNumber": 35,
+      "title": "Page 35",
+      "ambientAudio": "",
+      "interactions": []
+    },
+    {
+      "pageNumber": 36,
+      "title": "Page 36",
+      "ambientAudio": "",
+      "interactions": [
+        {
+          "id": "tts-36-0417",
+          "type": "tts",
+          "title": "Lecture 1",
+          "text": "It is Saturday and the Carters are at the park for apicnic. Danny is a under a big tree with his mangacomics. Beth is with her friend Megan. They fly theirkites high in the sky and Mr and Mrs Carter watchthem.Suddenly, Beth’s kite gets stuck in a tree. She pullsand pulls but it’s stuck. Mr Carter tries, too. Beth isvery sad because she hates losing her kite.“It is too high and it’s late now,” says Mr Carter. “Whydon’t we come back tomorrow?”“OK,’ she says. Let’s do that!”Early the next morning the Carters are all asleep inbed. The parrots are awake.“Beth is sad,” says Eric.“I know,” says Ernie. “She loves flying her kite.”“Why don’t we get it for her?” asks Eric.“Good idea!” says Ernie.They find Alfie and Sybil in the kitchen.“Do you want to come to the park?” asks Eric. “Beth’skite is stuck in a tree.”“Cool! We’d love to,” says Alfie.Eric and Ernie fly away and Aflie and Sybil run afterthem. They soon arrive at the park by the big tree.The park is empty. The kite is still there. Eric looks upat it.“Let’s fly up and pull it,” he says.",
+          "lang": "en-US",
+          "karaoke": true,
+          "x": "5%",
+          "y": "19.3%",
+          "size": 26
+        }
+      ]
+    },
+    {
+      "pageNumber": 37,
+      "title": "Page 37",
+      "ambientAudio": "",
+      "interactions": [
+        {
+          "id": "tts-37-8625",
+          "type": "tts",
+          "title": "Lecture 1",
+          "text": "The parrots fly to the top of the tree. They pull thekite but it’s stuck. Then Eric has an idea. “Let’s make amess in the tree, Ernie!” he says.The parrots fly into the tree and flap their wings andleaves fall everywhere. The kite moves.The parrots flap their wings again. More leaves fall.Then the kite falls from the tree.“Hooray!” shouts Eric.“Well done, guys!” shouts Sybil. But the kite falls intothe river.“Oh no!” says Ernie.“No problem,” says Alfie. He loves swimming. Hejumps into the river and swims after the kite. Hecatches the string. He swims and pulls the kite ontothe grass.Then the parrots pull the kite and fly it back to thehouse. When they get home the kite is dry. They putthe kite in the garden next to a tree.Later, Beth comes into the kitchen. She sees the kitefrom the window. “My kite!” she says.Mr and Mrs Carter and Danny see the kite.“Wow! How strange!” says Dad.Beth smiles. “I’m so happy now,” she says. She goesinto the garden and gets her kite. She brings it in.The pets watch her. They smile and go to sleep. TheAction Pets are heroes again!",
+          "lang": "en-US",
+          "karaoke": true,
+          "x": "5%",
+          "y": "19.3%",
+          "size": 26
+        }
+      ]
+    },
+    {
+      "pageNumber": 38,
+      "title": "Page 38",
+      "ambientAudio": "",
+      "interactions": []
+    },
+    {
+      "pageNumber": 39,
+      "title": "Page 39",
+      "ambientAudio": "",
+      "interactions": []
+    },
+    {
+      "pageNumber": 40,
+      "title": "Page 40",
+      "ambientAudio": "",
+      "interactions": []
+    }
+  ]
+}

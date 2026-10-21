@@ -1,0 +1,14 @@
+# Runs the Python service only. Run Next.js with `npm run dev:web` on your machine.
+services:
+  converter:
+    build:
+      context: .
+      dockerfile: python/Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - python/.env
+    volumes:
+      - converter-data:/app/tmp_data
+volumes:
+  converter-data:

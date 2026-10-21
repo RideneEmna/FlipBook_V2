@@ -1,0 +1,125 @@
+/* ── Google Fonts ─────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Cairo:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Design tokens – Light theme (default) ───────────────────────────────── */
+:root {
+  /* Brand: Vibrant Indigo */
+  --color-primary:        #6366f1;   /* indigo-500 */
+  --color-primary-hover:  #4f46e5;   /* indigo-600 */
+  --color-primary-subtle: #e0e7ff;   /* indigo-100 */
+
+  /* Surfaces */
+  --color-surface-base:   #f8fafc;  /* slate-50  */
+  --color-surface-card:   #ffffff;
+  --color-surface-hover:  #f1f5f9;  /* slate-100 */
+  --color-surface-border: #e2e8f0;  /* slate-200 */
+
+  /* Text */
+  --color-text-base:    #0f172a;    /* slate-900 */
+  --color-text-muted:   #64748b;    /* slate-500 */
+  --color-text-inverse: #ffffff;
+
+  /* Feedback – danger */
+  --color-danger:        #ef4444;   /* red-500  */
+  --color-danger-bg:     #fef2f2;   /* red-50   */
+  --color-danger-border: #fecaca;   /* red-200  */
+
+  /* Shape */
+  --radius-card: 1.25rem;           /* rounded-2xl */
+  --radius-btn:  0.75rem;           /* rounded-xl */
+
+  /* Typography */
+  --font-sans:   'Plus Jakarta Sans';
+  --font-arabic: 'Cairo';
+}
+
+/* ── Design tokens – Dark theme ──────────────────────────────────────────── */
+.dark {
+  --color-primary:        #6366f1;   /* indigo-500 */
+  --color-primary-hover:  #818cf8;   /* indigo-400 */
+  --color-primary-subtle: rgba(99, 102, 241, 0.15);
+
+  --color-surface-base:   #020617;  /* slate-950 */
+  --color-surface-card:   rgba(15, 23, 42, 0.7); /* glass slate-900 */
+  --color-surface-hover:  rgba(30, 41, 59, 0.8);
+  --color-surface-border: rgba(255, 255, 255, 0.08);
+
+  --color-text-base:    #f8fafc;    /* slate-50 */
+  --color-text-muted:   #94a3b8;    /* slate-400 */
+  --color-text-inverse: #020617;
+
+  --color-danger:        #f87171;   /* red-400  */
+  --color-danger-bg:     #1c0a0a;
+  --color-danger-border: #7f1d1d;   /* red-900  */
+}
+
+/* ── Base styles & Utilities ──────────────────────────────────────────────── */
+@layer base {
+  body {
+    background-color: var(--color-surface-base);
+    color: var(--color-text-base);
+    font-family: var(--font-sans), system-ui, sans-serif;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  :lang(ar),
+  [dir='rtl'] {
+    font-family: var(--font-arabic), system-ui, sans-serif;
+    direction: rtl;
+    text-align: start;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  .dark .glass-panel {
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.5);
+  }
+
+  .glow-effect {
+    box-shadow: 0 0 45px -10px rgba(99, 102, 241, 0.15);
+  }
+
+  .dark .glow-effect {
+    box-shadow: 0 0 50px -10px rgba(99, 102, 241, 0.3);
+  }
+
+  .glow-btn {
+    box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);
+  }
+}
+
+/* ── Custom Scrollbar matching prototype ─────────────────────────────────── */
+::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #334155 transparent;
+}
+
+

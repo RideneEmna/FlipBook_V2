@@ -1,0 +1,558 @@
+{
+  "version": "1.0",
+  "savedAt": "2026-10-06T10:20:55.655Z",
+  "title": "Best English Unit 1",
+  "subtitle": "",
+  "pdf_path": "C:\\Users\\MSI\\Downloads\\Starter Unit-Best English.pdf",
+  "output_dir": "C:\\Users\\MSI\\Downloads\\Starter Unit-Best English v2\\Starter Unit-Best English.pdf",
+  "dpi": 300,
+  "totalPages": 36,
+  "pages": [
+    {
+      "pageNumber": 1,
+      "title": "Page 1",
+      "ambientAudio": "",
+      "interactions": [],
+      "displayOrder": 0
+    },
+    {
+      "pageNumber": 2,
+      "title": "Page 2",
+      "ambientAudio": "",
+      "interactions": [],
+      "displayOrder": 1
+    },
+    {
+      "pageNumber": 3,
+      "title": "Page 3",
+      "ambientAudio": "",
+      "interactions": [],
+      "displayOrder": 2
+    },
+    {
+      "pageNumber": 4,
+      "title": "Page 4",
+      "ambientAudio": "",
+      "interactions": [],
+      "displayOrder": 3
+    },
+    {
+      "pageNumber": 5,
+      "title": "Page 5",
+      "ambientAudio": "",
+      "interactions": [],
+      "displayOrder": 4
+    },
+    {
+      "pageNumber": 6,
+      "title": "Page 6",
+      "ambientAudio": "",
+      "interactions": [],
+      "displayOrder": 5
+    },
+    {
+      "pageNumber": 7,
+      "title": "Page 7",
+      "ambientAudio": "",
+      "interactions": [],
+      "displayOrder": 6
+    },
+    {
+      "pageNumber": 8,
+      "title": "Page 8",
+      "ambientAudio": "",
+      "interactions": [
+        {
+          "id": "tts-8-2053",
+          "type": "tts",
+          "title": "Lecture 1",
+          "text": "Meet the Carter family! They live in York, in the north of England.Mr Carter is a geography teacher and Mrs Carter is a nurse.They get up at 6:30 am and the children get up at 7:00 am. They have breakfast at 7:30 am.Danny and Beth eat cereal and toast. They don’t drink coffee or tea, but they drink orangejuice.Alfie the dog and Sybil the cat have breakfast, too. Do the parrots, Eric and Ernie, eat breakfastin the morning? No, they don’t. They sleep! They are lazy, funny birds.",
+          "lang": "en-GB",
+          "karaoke": false,
+          "x": "7%",
+          "y": "32.4%",
+          "size": 26
+        },
+        {
+          "id": "modal-8-4853",
+          "type": "modal",
+          "title": "Zoom HD 1",
+          "imageSrc": "",
+          "x": "8.7%",
+          "y": "52.9%",
+          "width": "85.6%",
+          "height": "43.9%"
+        }
+      ],
+      "displayOrder": 7
+    },
+    {
+      "pageNumber": 9,
+      "title": "Page 9",
+      "ambientAudio": "",
+      "interactions": [],
+      "displayOrder": 8
+    },
+    {
+      "pageNumber": 10,
+      "title": "Page 10",
+      "ambientAudio": "",
+      "interactions": [],
+      "displayOrder": 9
+    },
+    {
+      "pageNumber": 11,
+      "title": "Page 11",
+      "ambientAudio": "",
+      "interactions": [],
+      "displayOrder": 10
+    },
+    {
+      "pageNumber": 12,
+      "title": "Page 12",
+      "ambientAudio": "",
+      "interactions": [],
+      "displayOrder": 11
+    },
+    {
+      "pageNumber": 13,
+      "title": "Page 13",
+      "ambientAudio": "",
+      "interactions": [
+        {
+          "id": "modal-13-7381",
+          "type": "modal",
+          "title": "Zoom HD 1",
+          "imageSrc": "",
+          "x": "7.9%",
+          "y": "20.4%",
+          "width": "77.8%",
+          "height": "24.1%"
+        }
+      ],
+      "displayOrder": 12
+    },
+    {
+      "pageNumber": 14,
+      "title": "Page 14",
+      "ambientAudio": "",
+      "interactions": [],
+      "displayOrder": 13
+    },
+    {
+      "pageNumber": 15,
+      "title": "Page 15",
+      "ambientAudio": "",
+      "interactions": [
+        {
+          "id": "modal-15-9917",
+          "type": "modal",
+          "title": "Zoom HD 1",
+          "imageSrc": "",
+          "x": "8.9%",
+          "y": "29.4%",
+          "width": "85.4%",
+          "height": "29.9%"
+        }
+      ],
+      "displayOrder": 14
+    },
+    {
+      "pageNumber": 16,
+      "title": "Page 16",
+      "ambientAudio": "",
+      "interactions": [
+        {
+          "id": "tts-16-0877",
+          "type": "tts",
+          "title": "Lecture 1",
+          "text": "When the family goes out, thepets play. Sybil the cat runsacross the living room. Alfiethe dog, chases her. She hidesunder the sofa. She doesn’twant to play. He jumps ontothe sofa. He watches her andhe waits. He doesn’t catch herbecause Sybil is too fast andtoo clever.Eric and Ernie, the parrots, siton the back of a large armchair.They don’t sleep. They watchTV and they talk. Eric likessport on TV. He loves football,but he doesn’t like rugby. Heshouts, “Goal! Goal!” Ernielikes cooking programmes.He loves shows about baking.He likes pancakes but hedoesn’t like waffles. He says,“Pancakes?” “Yes, please!”and “Waffles? Ugh! No, thankyou!”",
+          "lang": "en-GB",
+          "karaoke": false,
+          "x": "6%",
+          "y": "34.2%",
+          "size": 24
+        },
+        {
+          "id": "modal-16-9773",
+          "type": "modal",
+          "title": "Zoom HD 1",
+          "imageSrc": "",
+          "x": "38.5%",
+          "y": "35.4%",
+          "width": "61.5%",
+          "height": "45.6%"
+        }
+      ],
+      "displayOrder": 15
+    },
+    {
+      "pageNumber": 17,
+      "title": "Page 17",
+      "ambientAudio": "",
+      "interactions": [],
+      "displayOrder": 16
+    },
+    {
+      "pageNumber": 18,
+      "title": "Page 18",
+      "ambientAudio": "",
+      "interactions": [],
+      "displayOrder": 17
+    },
+    {
+      "pageNumber": 19,
+      "title": "Page 19",
+      "ambientAudio": "",
+      "interactions": [],
+      "displayOrder": 18
+    },
+    {
+      "pageNumber": 20,
+      "title": "Page 20",
+      "ambientAudio": "",
+      "interactions": [
+        {
+          "id": "modal-20-2037",
+          "type": "modal",
+          "title": "Zoom HD 1",
+          "imageSrc": "",
+          "x": "12.2%",
+          "y": "22.1%",
+          "width": "81.9%",
+          "height": "18.6%"
+        },
+        {
+          "id": "modal-20-0541",
+          "type": "modal",
+          "title": "Zoom HD 2",
+          "imageSrc": "",
+          "x": "11.5%",
+          "y": "40%",
+          "width": "72%",
+          "height": "31%"
+        }
+      ],
+      "displayOrder": 19
+    },
+    {
+      "pageNumber": 21,
+      "title": "Page 21",
+      "ambientAudio": "",
+      "interactions": [],
+      "displayOrder": 20
+    },
+    {
+      "pageNumber": 22,
+      "title": "Page 22",
+      "ambientAudio": "",
+      "interactions": [
+        {
+          "id": "modal-22-7717",
+          "type": "modal",
+          "title": "Zoom HD 1",
+          "imageSrc": "",
+          "x": "11%",
+          "y": "43.5%",
+          "width": "72.9%",
+          "height": "30.2%"
+        }
+      ],
+      "displayOrder": 21
+    },
+    {
+      "pageNumber": 23,
+      "title": "Page 23",
+      "ambientAudio": "",
+      "interactions": [
+        {
+          "id": "modal-23-4429",
+          "type": "modal",
+          "title": "Zoom HD 1",
+          "imageSrc": "",
+          "x": "8%",
+          "y": "9.5%",
+          "width": "69.6%",
+          "height": "29%"
+        }
+      ],
+      "displayOrder": 22
+    },
+    {
+      "pageNumber": 24,
+      "title": "Page 24",
+      "ambientAudio": "",
+      "interactions": [
+        {
+          "id": "modal-24-1413",
+          "type": "modal",
+          "title": "Zoom HD 1",
+          "imageSrc": "",
+          "x": "5.5%",
+          "y": "35.2%",
+          "width": "20%",
+          "height": "12.7%"
+        },
+        {
+          "id": "modal-24-1333",
+          "type": "modal",
+          "title": "Zoom HD 2",
+          "imageSrc": "",
+          "x": "77.7%",
+          "y": "55.8%",
+          "width": "18.8%",
+          "height": "13.3%"
+        },
+        {
+          "id": "modal-24-1397",
+          "type": "modal",
+          "title": "Zoom HD 3",
+          "imageSrc": "",
+          "x": "5.5%",
+          "y": "71.2%",
+          "width": "20%",
+          "height": "13.6%"
+        },
+        {
+          "id": "tts-24-9101",
+          "type": "tts",
+          "title": "Lecture 1",
+          "text": "The Carter family always enjoys the weekend! Beth plays football for herschool. She always has a match on Saturday morning. She’s the goalkeeper,so she usually comes home with mud everywhere! Danny plays footballfor his school team, too, and always plays on Saturday afternoons. Theyusually ride their bikes to the football matches. Sometimes, when it rains,Mr Carter takes them in the car. Danny and Beth always leave their dirty football kit on thefloor in the kitchen. They never put it in the washing machine!Mrs Carter is a very good artist. She draws pictures of the pets. She oftendraws funny cartoons to make Danny and Beth laugh. When she draws,Mrs Carter listens to podcasts about sport and travel. On Sundays Mr Carterusually washes the car. He never listens to podcasts. Sometimes he goesfishing with Sam, his next-door neighbour. They are good friends. Whenthey catch fish they never keep them. They always put them back in theriver. For them it is only a sport and a time to chat.When there is music in the house, Eric and Ernie always dance. Theysometimes sing, too. CAW! CAW! Alfie usually chases Sybil around thehouse, and Sybil always escapes!",
+          "lang": "en-GB",
+          "karaoke": false,
+          "x": "7%",
+          "y": "35.7%",
+          "size": 24
+        }
+      ],
+      "displayOrder": 23
+    },
+    {
+      "pageNumber": 25,
+      "title": "Page 25",
+      "ambientAudio": "",
+      "interactions": [],
+      "displayOrder": 24
+    },
+    {
+      "pageNumber": 26,
+      "title": "Page 26",
+      "ambientAudio": "",
+      "interactions": [
+        {
+          "id": "modal-26-0677",
+          "type": "modal",
+          "title": "Zoom HD 1",
+          "imageSrc": "",
+          "x": "45.6%",
+          "y": "14%",
+          "width": "13.8%",
+          "height": "10.4%"
+        },
+        {
+          "id": "modal-26-7605",
+          "type": "modal",
+          "title": "Zoom HD 2",
+          "imageSrc": "",
+          "x": "60.2%",
+          "y": "14.3%",
+          "width": "14.4%",
+          "height": "10.2%"
+        },
+        {
+          "id": "modal-26-4701",
+          "type": "modal",
+          "title": "Zoom HD 3",
+          "imageSrc": "",
+          "x": "75.1%",
+          "y": "13.7%",
+          "width": "13.8%",
+          "height": "10.5%"
+        },
+        {
+          "id": "modal-26-1317",
+          "type": "modal",
+          "title": "Zoom HD 4",
+          "imageSrc": "",
+          "x": "45.4%",
+          "y": "24.5%",
+          "width": "14%",
+          "height": "10.2%"
+        },
+        {
+          "id": "modal-26-0485",
+          "type": "modal",
+          "title": "Zoom HD 5",
+          "imageSrc": "",
+          "x": "60.5%",
+          "y": "24.7%",
+          "width": "14%",
+          "height": "9.8%"
+        },
+        {
+          "id": "modal-26-6181",
+          "type": "modal",
+          "title": "Zoom HD 6",
+          "imageSrc": "",
+          "x": "75.1%",
+          "y": "24.4%",
+          "width": "14%",
+          "height": "10.2%"
+        }
+      ],
+      "displayOrder": 25
+    },
+    {
+      "pageNumber": 27,
+      "title": "Page 27",
+      "ambientAudio": "",
+      "interactions": [],
+      "displayOrder": 26
+    },
+    {
+      "pageNumber": 28,
+      "title": "Page 28",
+      "ambientAudio": "",
+      "interactions": [],
+      "displayOrder": 27
+    },
+    {
+      "pageNumber": 29,
+      "title": "Page 29",
+      "ambientAudio": "",
+      "interactions": [
+        {
+          "id": "modal-29-7893",
+          "type": "modal",
+          "title": "Zoom HD 1",
+          "imageSrc": "",
+          "x": "8.9%",
+          "y": "75.5%",
+          "width": "79.1%",
+          "height": "18.6%"
+        }
+      ],
+      "displayOrder": 28
+    },
+    {
+      "pageNumber": 30,
+      "title": "Page 30",
+      "ambientAudio": "",
+      "interactions": [],
+      "displayOrder": 29
+    },
+    {
+      "pageNumber": 31,
+      "title": "Page 31",
+      "ambientAudio": "",
+      "interactions": [
+        {
+          "id": "modal-31-9893",
+          "type": "modal",
+          "title": "Zoom HD 1",
+          "imageSrc": "",
+          "x": "7.6%",
+          "y": "10.5%",
+          "width": "85.8%",
+          "height": "44.1%"
+        }
+      ],
+      "displayOrder": 30
+    },
+    {
+      "pageNumber": 32,
+      "title": "Page 32",
+      "ambientAudio": "",
+      "interactions": [
+        {
+          "id": "tts-32-1445",
+          "type": "tts",
+          "title": "Lecture 1",
+          "text": "The Carter family’s pets have a secret. Alfie, Sybil, Eric and Ernie are special helpers! Theyare the Action Pets! They always help people and the Carters do not know about it. Noone knows about it.One Tuesday morning Eric flies to the window. “Does anyone need help today?” he asks.“Yes!” shouts Ernie. “Mrs Green always walks to the shops on Tuesday, but today shedoesn’t feel well. And her cat is stuck up on a tree!”Alfie runs so fast that he almost flies! He takes the small gardentrampoline as a safety net for the cat. Sybil usually stays at homeand sleeps, but today she climbs the tree and rescues Mrs Green’scat. Now the two cats are best friends!Eric and Ernie go to the shops and collect hershopping. They fly with the bags in their beaks, but an egg falls!Ernie catches it with his feet. “I never drop eggs!” he says.Mrs Green opens her door. “How does myshopping always get here when I feel unwell?”she asks. The pets smile and go home. She doesn’t see them. TheCarters do not see them get back in the house. No one sees them.Do the Carters know about the Action Pets?No, they don’t! When the family has breakfastat 7:30 am, Alfie wants his breakfast as always, and Sybil sleeps asusual. The parrots look out of the window. Mrs Green is surprisedand happy. Her cat is happy, too.",
+          "lang": "en-GB",
+          "karaoke": false,
+          "x": "7%",
+          "y": "22.5%",
+          "size": 24
+        },
+        {
+          "id": "modal-32-1685",
+          "type": "modal",
+          "title": "Zoom HD 1",
+          "imageSrc": "",
+          "x": "9.1%",
+          "y": "39.2%",
+          "width": "19.6%",
+          "height": "13.9%"
+        },
+        {
+          "id": "modal-32-9477",
+          "type": "modal",
+          "title": "Zoom HD 2",
+          "imageSrc": "",
+          "x": "71.5%",
+          "y": "49.7%",
+          "width": "20%",
+          "height": "14.2%"
+        },
+        {
+          "id": "modal-32-7062",
+          "type": "modal",
+          "title": "Zoom HD 3",
+          "imageSrc": "",
+          "x": "9.4%",
+          "y": "62.7%",
+          "width": "19.6%",
+          "height": "13.9%"
+        },
+        {
+          "id": "modal-32-3014",
+          "type": "modal",
+          "title": "Zoom HD 4",
+          "imageSrc": "",
+          "x": "71.7%",
+          "y": "74.4%",
+          "width": "19.4%",
+          "height": "13.9%"
+        },
+        {
+          "id": "video-32-3882",
+          "type": "video",
+          "title": "Vidéo YouTube 1",
+          "youtubeUrl": "https://youtu.be/LKNK_llFNQU?feature=shared",
+          "x": "85.53%",
+          "y": "7.98%"
+        }
+      ],
+      "displayOrder": 31
+    },
+    {
+      "pageNumber": 33,
+      "title": "Page 33",
+      "ambientAudio": "",
+      "interactions": [],
+      "displayOrder": 32
+    },
+    {
+      "pageNumber": 34,
+      "title": "Page 34",
+      "ambientAudio": "",
+      "interactions": [],
+      "displayOrder": 33
+    },
+    {
+      "pageNumber": 35,
+      "title": "Page 35",
+      "ambientAudio": "",
+      "interactions": [],
+      "displayOrder": 34
+    },
+    {
+      "pageNumber": 36,
+      "title": "Page 36",
+      "ambientAudio": "",
+      "interactions": [],
+      "displayOrder": 35
+    }
+  ]
+}

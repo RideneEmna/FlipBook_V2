@@ -1,0 +1,15 @@
+{
+  "name": "flipbook-converter",
+  "private": true,
+  "workspaces": ["packages/*", "apps/*"],
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev:web": "npm run dev -w apps/web",
+    "dev:python": "cd python && uvicorn main:app --reload --port 8000",
+    "build:offline": "npm run build -w apps/offline",
+    "watch:offline": "npm run watch -w apps/offline",
+    "build:web": "npm run build -w apps/web",
+    "lint": "npm run lint -w packages/viewer -w apps/web",
+    "typecheck": "npm run typecheck -w packages/viewer -w apps/web -w apps/offline"
+  }
+}

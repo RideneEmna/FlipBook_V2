@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <title>Flipbook Studio Pro — Convertisseur & Éditeur de Pages Interactives</title>
+  <meta name="description" content="Studio complet de configuration page par page et conversion de PDF en Flipbook HTML5 interactif offline." />
+
+  <!-- Studio Modular Styles -->
+  <link rel="stylesheet" href="studio/css/01-theme.css" />
+  <link rel="stylesheet" href="studio/css/02-layout.css" />
+  <link rel="stylesheet" href="studio/css/03-components.css" />
+  <link rel="stylesheet" href="studio/css/04-modals.css" />
+  <link rel="stylesheet" href="studio/css/05-simulator.css" />
+
+  <script src="/api/media-preview?path=assets/lottie.min.js"></script>
+  <script>
+    if (!window.lottie) {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"><\/script>');
+    }
+  </script>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════ HEADER -->
+  <header class="top-header">
+    <div class="top-badge">⚡ Flipbook Studio Pro · Éditeur Interactif</div>
+    <h1>Convertisseur & Configurateur de Flipbook</h1>
+    <p>Configurez chaque page (textes à lire, modales HD, pistes audio) avant de compiler votre Flipbook HTML5 autonome.</p>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════════ STEPPER -->
+  <nav class="stepper-nav">
+    <div class="step-tab active" id="tab-step-1" onclick="switchStep(1)">
+      <span class="step-circle">1</span>
+      <span>Document PDF & Projet</span>
+    </div>
+    <div class="step-tab" id="tab-step-2" onclick="switchStep(2)">
+      <span class="step-circle">2</span>
+      <span>Configuration des Pages</span>
+    </div>
+    <div class="step-tab" id="tab-step-3" onclick="switchStep(3)">
+      <span class="step-circle">3</span>
+      <span>Conversion Finale</span>
+    </div>
+  </nav>
+  <div id="error-toast"></div>
+
+  <!-- ═══════════════════════════════════════════════════════ STEP 1 VIEW -->
+
+  <div class="view-panel active" id="view-step-1">
+
+    <!-- Auto-Save Recovery Banner -->
+    <div id="autosave-banner" style="display:none; background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.45); border-radius:10px; padding:12px 18px; margin-bottom:18px; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+      <div style="font-size:13px; color:#f1f5f9; display:flex; align-items:center; gap:10px;">
+        <span style="font-size:22px;">🔄</span>
+        <div>
+          <div>Une session précédente a été sauvegardée : <strong id="autosave-title" style="color:#34d399;"></strong></div>
+          <div id="autosave-details" style="font-size:11px; color:var(--text-muted); margin-top:2px;"></div>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-success" type="button" onclick="restoreAutoSave()" style="padding:8px 14px; font-size:12px; font-weight:800;">⚡ Reprendre mon travail</button>
+        <button class="btn" type="button" onclick="dismissAutoSave()" style="padding:8px 12px; font-size:12px;">Ignorer</button>
+      </div>
+    </div>
+
+    <!-- Hidden native project file input -->
+    <input type="file" id="project-file-input" accept=".json,application/json" style="display:none;" onchange="handleProjectFileInput(this)" />
+    <div class="card">
+      <div class="card-title">
+        <span class="icon">📄</span>
+        <span>Sélection du Document PDF</span>
+      </div>
+
+      <!-- Hidden native file input -->
+      <input type="file" id="pdf-file-input" accept=".pdf" style="display:none;" onchange="handleNativeFileInput(this)" />
+
+      <!-- Drag & Drop Zone -->
+      <div class="drop-zone" id="drop-zone">
+        <div class="drop-icon">📚</div>
+        <div class="drop-text" id="drop-text">Cliquez pour choisir un PDF ou glissez-déposez le fichier ici</div>
+        <div class="drop-subtext">Supporte tous les documents PDF (manuels scolaires, catalogues, magazines)</div>
+        <div id="upload-status-text" style="display:none; font-size:12px; color:var(--cyan-light); font-weight:700; margin-top:8px;"></div>
+      </div>
+
+      <!-- Auto-Detected Local PDFs Banner -->
+      <div id="detected-pdfs-bar" style="display:none; background:rgba(0,162,237,0.12); border:1px solid rgba(0,162,237,0.45); border-radius:10px; padding:12px 16px; margin-top:14px; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+        <div style="font-size:13px; color:#f1f5f9; display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">📖</span>
+          <div>
+            <div>PDF détecté dans votre projet : <strong id="detected-pdf-name" style="color:var(--cyan-light);"></strong></div>
+            <div id="detected-pdf-size" style="font-size:11px; color:var(--text-muted);"></div>
+          </div>
+        </div>
+        <button class="btn btn-primary" type="button" onclick="useDetectedPdf()" style="padding:8px 14px; font-size:12px;">⚡ Utiliser ce PDF</button>
+      </div>
+      <div class="form-group">
+        <label for="pdf-path">Chemin ou Fichier PDF :</label>
+        <div class="input-with-btn">
+          <input type="text" id="pdf-path" class="input-text" placeholder="Ex: C:\Livres\MonLivre.pdf ou sélectionner ci-contre" />
+          <button class="btn btn-primary" onclick="openNativeFilePicker()" type="button" title="Sélectionner directement dans votre navigateur">📁 Parcourir PDF...</button>
+          <button class="btn" onclick="browsePdfWindows()" type="button" title="Ouvrir l'explorateur Windows">💻 Explorateur PC...</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="output-dir">Dossier de Destination Final :</label>
+        <div class="input-with-btn">
+          <input type="text" id="output-dir" class="input-text" placeholder="Dossier d'exportation (généré automatiquement si vide)" />
+          <button class="btn" onclick="browseDir()" type="button">📂 Choisir Dossier...</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">
+        <span class="icon">⚙️</span>
+        <span>Options Générales & Résolution</span>
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+        <div class="form-group" style="margin-top:0">
+          <label for="book-title">Titre du Flipbook :</label>
+          <input type="text" id="book-title" class="input-text" placeholder="Titre du livre" />
+        </div>
+        <div class="form-group" style="margin-top:0">
+          <label for="book-subtitle">Sous-titre :</label>
+          <input type="text" id="book-subtitle" class="input-text" placeholder="Sous-titre ou description" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Résolution de Rendu :</label>
+        <div class="dpi-pills">
+          <div class="dpi-pill" onclick="selectDpi(150, this)">⚡ Rapide (150 DPI)</div>
+          <div class="dpi-pill active" onclick="selectDpi(300, this)">✨ HD Recommandé (300 DPI)</div>
+          <div class="dpi-pill" onclick="selectDpi(450, this)">💎 Ultra HD (450 DPI)</div>
+        </div>
+      </div>
+      <div style="margin-top: 24px; display:flex; gap:12px; flex-wrap:wrap;">
+        <button class="btn btn-primary" style="flex:1; padding:14px;" onclick="loadPdfAndOpenStudio()">
+          <span>🎨 Charger le PDF & Configurer les Pages ➔</span>
+        </button>
+        <button class="btn" onclick="loadProjectFile()">
+          <span>📂 Ouvrir un Projet (.json)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ STEP 2 VIEW (STUDIO EDITOR) -->
+
+  <div class="view-panel" id="view-step-2">
+
+    <!-- Top Bar -->
+    <div class="studio-header-bar">
+      <div class="page-nav-group">
+        <button class="btn" onclick="prevPage()">◀ Page Précédente</button>
+        <div class="page-badge-pill" id="page-indicator-pill">Page 1 / 1</div>
+        <button class="btn" onclick="nextPage()">Page Suivante ▶</button>
+        <button class="btn" onclick="openPageLivePreview()" style="font-weight:800; background:linear-gradient(135deg, #0ea5e9 0%, #10b981 100%); border:none; box-shadow:0 0 16px rgba(16,185,129,0.4); color:#fff;" title="Tester le rendu réel avec voix, sons et modales zoom">
+          <span>👁️ Tester cette Page en Direct</span>
+        </button>
+      </div>
+      <div class="studio-actions" style="display:flex; align-items:center; gap:8px;">
+        <span id="autosave-indicator" style="font-size:11px; color:#34d399; font-weight:700; transition:opacity 0.3s; opacity:0.6;">💾 Auto-sauvegardé</span>
+        <button class="btn" onclick="saveProjectFile()" title="Télécharger le fichier projet JSON pour sauvegarder tout votre avancement">💾 Sauvegarder Projet (.json)</button>
+        <button class="btn" onclick="loadProjectFile()" title="Charger un fichier projet JSON pour reprendre le travail">📂 Charger (.json)</button>
+        <button class="btn btn-success" onclick="goToConversionStep()">🚀 Passer à la Conversion ➔</button>
+      </div>
+    </div>
+
+    <!-- Main Workspace -->
+    <div class="studio-layout">
+
+      <!-- Left: Interactive Canvas -->
+      <div class="canvas-panel">
+        <div class="canvas-toolbar">
+          <div class="tool-group">
+            <span style="font-size:12px; font-weight:700; color:var(--text-muted);">OUTILS :</span>
+            <button class="tool-btn active" id="tool-select" onclick="setToolMode('select')" title="Sélectionner ou surligner du texte directement">
+              <span>👆 Sélection / Surligner</span>
+            </button>
+            <button class="tool-btn" id="tool-lasso" onclick="setToolMode('lasso')" title="Tracer un cadre pour capturer un paragraphe de texte">
+              <span>📝 Lasso Paragraphe</span>
+            </button>
+            <button class="tool-btn" id="tool-tts" onclick="setToolMode('tts')" title="Placer un bouton de lecture vocale">
+              <span>🗣️ TTS</span>
+            </button>
+            <button class="tool-btn" id="tool-audio" onclick="setToolMode('audio')" title="Placer un bouton audio">
+              <span>🎧 Audio</span>
+            </button>
+            <button class="tool-btn" id="tool-video" onclick="setToolMode('video')" title="Placer un bouton vidéo YouTube">
+              <span>▶️ Vidéo</span>
+            </button>
+            <button class="tool-btn" id="tool-modal" onclick="setToolMode('modal')" title="Tracer une zone modale zoom">
+              <span>🔍 Zoom</span>
+            </button>
+            <button class="tool-btn" id="tool-fill-blank" onclick="setToolMode('fill-blank')" title="Tracer une zone de texte à compléter (fill-in-the-blank)">
+              <span>✏️ Texte à trou</span>
+            </button>
+            <button class="tool-btn" id="tool-reveal" onclick="setToolMode('reveal')" title="Tracer une zone masquée révélée au clic">
+              <span>👁️ Révéler</span>
+            </button>
+            <button class="tool-btn" id="tool-checkbox" onclick="setToolMode('checkbox')" title="Placer une case à cocher vrai/faux">
+              <span>☑️ Case à cocher</span>
+            </button>
+            <button class="tool-btn" id="tool-validation" onclick="setToolMode('validation')" title="Placer un bouton pour corriger la page (score)">
+              <span>🎯 Bouton Corriger</span>
+            </button>
+          </div>
+        </div>
+        <div class="tool-hint-banner" id="tool-hint-banner">
+          Cliquez sur la page pour placer l'élément à l'endroit exact.
+        </div>
+        <div class="canvas-viewport" id="canvas-viewport">
+          <div class="canvas-img-container" id="canvas-container">
+            <img class="canvas-img" id="canvas-img" src="" alt="Aperçu Page" />
+            <div class="text-selection-layer" id="text-layer"></div>
+            <div id="canvas-karaoke-page-layer" class="sim-karaoke-page-layer"></div>
+            <div class="canvas-overlay" id="canvas-overlay"></div>
+            <div class="drag-selection-box" id="drag-box"></div>
+            <div id="text-action-pill" class="text-action-pill">
+              <span id="pill-text-snippet" style="max-width:180px; overflow:hidden; text-overflow:ellipsis; font-size:11px; color:#cbd5e1; font-weight:600;"></span>
+              <button class="pill-btn pill-btn-primary" type="button" onclick="applySelectedTextToTts()">
+                <span>🗣️ Insérer dans TTS</span>
+              </button>
+              <button class="pill-btn" type="button" onclick="createNewTtsFromSelection()">
+                <span>+ Nouveau TTS</span>
+              </button>
+              <button class="pill-btn-close" type="button" onclick="hideTextActionPill()">✕</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Inspector Panel -->
+      <div class="inspector-panel" id="inspector-panel">
+        <div class="inspector-header">
+          <div class="inspector-title">
+            <span>⚙️ Configuration de la Page</span>
+          </div>
+          <span id="page-summary-badge" style="font-size:11px; color:var(--cyan-light); font-weight:700;"></span>
+        </div>
+
+        <!-- Page General Settings -->
+        <div class="form-group" style="margin-top:0">
+          <label for="current-page-title">Titre de la Page :</label>
+          <input type="text" id="current-page-title" class="input-text" placeholder="Ex: Page 1 - Couverture" oninput="onPageTitleChange(this.value)" />
+        </div>
+        <div class="form-group">
+          <label for="current-page-ambient">Son d'ambiance (au feuilletage) :</label>
+          <div class="input-with-btn">
+            <input type="text" id="current-page-ambient" class="input-text" placeholder="Fichier audio optionnel" oninput="onPageAmbientChange(this.value)" />
+            <button class="btn" type="button" onclick="browsePageAmbient()">📁</button>
+          </div>
+        </div>
+        <hr style="border:none; border-top:1px solid var(--border); margin:4px 0;" />
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label style="font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Interactions sur cette page :</label>
+          <button class="btn btn-primary" style="padding:6px 10px; font-size:11px;" onclick="addInteractionPrompt()">+ Ajouter</button>
+        </div>
+
+        <!-- List of Interactions on Active Page -->
+        <div id="interactions-list" style="display:flex; flex-direction:column; gap:10px;">
+
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Filmstrip -->
+    <div class="filmstrip-wrap">
+      <div class="filmstrip-header">
+        <span>Toutes les pages (<span id="filmstrip-count">0</span> pages)</span>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <button class="filmstrip-btn" onclick="insertBlankPage()" title="Ajouter une page vierge">
+            ➕ Page vierge
+          </button>
+          <button class="filmstrip-btn import" onclick="openImportPdfModal()" title="Importer des pages depuis un autre PDF">
+            📎 Importer PDF
+          </button>
+        </div>
+      </div>
+      <div class="filmstrip-container" id="filmstrip-container">
+
+        <!-- Dynamically populated -->
+      </div>
+    </div>
+
+    <!-- Import PDF Modal -->
+    <div id="import-pdf-modal">
+      <div id="import-pdf-box">
+        <h3>📎 Importer des pages depuis un PDF</h3>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input type="text" id="import-pdf-path" class="input-text" placeholder="Chemin du PDF ou parcourir..." style="flex:1" />
+          <button class="btn" type="button" onclick="browseImportPdf()">📁 Parcourir</button>
+          <button class="btn btn-primary" type="button" onclick="loadImportPdfThumbs()">Charger →</button>
+        </div>
+        <div id="import-pdf-info" style="font-size:12px; color:var(--text-muted); min-height:18px;"></div>
+        <div id="import-page-grid"></div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span id="import-selection-count" style="font-size:12px; font-weight:700; color:#34d399;">0 page(s) sélectionnée(s)</span>
+          <div style="display:flex; gap:8px;">
+            <button class="btn" type="button" onclick="closeImportPdfModal()">Annuler</button>
+            <button class="btn btn-success" type="button" onclick="confirmImportPages()">✅ Importer les pages sélectionnées</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ STEP 3 VIEW (CONVERSION) -->
+
+  <div class="view-panel" id="view-step-3">
+    <div class="card">
+      <div class="card-title">
+        <span class="icon">🚀</span>
+        <span>Récapitulatif & Lancement de la Conversion Finale</span>
+      </div>
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:20px;">
+        <div style="background:var(--bg-darker); padding:14px; border-radius:10px; border:1px solid var(--border);">
+          <div style="font-size:11px; color:var(--text-muted); font-weight:700;">TOTAL PAGES</div>
+          <div style="font-size:24px; font-weight:800; color:#fff;" id="sum-total-pages">0</div>
+        </div>
+        <div style="background:var(--bg-darker); padding:14px; border-radius:10px; border:1px solid var(--border);">
+          <div style="font-size:11px; color:var(--text-muted); font-weight:700;">TEXTES À LIRE (TTS)</div>
+          <div style="font-size:24px; font-weight:800; color:#38bdf8;" id="sum-tts-count">0</div>
+        </div>
+        <div style="background:var(--bg-darker); padding:14px; border-radius:10px; border:1px solid var(--border);">
+          <div style="font-size:11px; color:var(--text-muted); font-weight:700;">PISTES AUDIO</div>
+          <div style="font-size:24px; font-weight:800; color:#fbbf24;" id="sum-audio-count">0</div>
+        </div>
+        <div style="background:var(--bg-darker); padding:14px; border-radius:10px; border:1px solid var(--border);">
+          <div style="font-size:11px; color:var(--text-muted); font-weight:700;">ZONES MODALES ZOOM</div>
+          <div style="font-size:24px; font-weight:800; color:#c084fc;" id="sum-modal-count">0</div>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="btn-start-convert" style="width:100%; padding:16px; font-size:15px;" onclick="startConversion()">
+        <span>⚡ Lancer la Conversion en Flipbook Enrichi</span>
+      </button>
+    </div>
+
+    <!-- Progress Card -->
+    <div class="card" id="progress-card" style="display:none;">
+      <div class="card-title">
+        <span class="icon">⏳</span>
+        <span>Conversion en Cours... (<span id="progress-pct">0%</span>)</span>
+      </div>
+      <div id="progress-step-text" style="font-size:13px; color:var(--cyan-light); font-weight:600; margin-bottom:8px;">Initialisation...</div>
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="progress-bar-fill"></div>
+      </div>
+      <div style="font-size:11px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">Journal d'exécution :</div>
+      <div class="log-box" id="log-box"></div>
+    </div>
+
+    <!-- Success Card -->
+    <div class="card" id="success-card" style="display:none; border-color:rgba(16,185,129,0.6); background:rgba(16,185,129,0.06);">
+      <div class="card-title" style="color:#34d399;">
+        <span class="icon">✓</span>
+        <span>Flipbook Généré avec Succès !</span>
+      </div>
+      <p style="font-size:13px; color:#cbd5e1; margin-bottom:16px;">
+        Votre Flipbook interactif autonome est prêt. Il intègre toutes vos interactions configurées, audios et zooms HD.
+      </p>
+      <div id="success-path" style="font-size:12px; font-family:monospace; color:#a7f3d0; margin-bottom:16px; word-break:break-all;"></div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <button class="btn btn-success" style="flex:1; padding:14px;" onclick="openGeneratedFlipbook()">
+          <span>📖 Ouvrir le Flipbook dans le Navigateur</span>
+        </button>
+        <button class="btn" onclick="openOutputFolder()">
+          <span>📁 Ouvrir le Dossier d'Export</span>
+        </button>
+        <button class="btn" onclick="switchStep(2)">
+          <span>✏️ Modifier les Pages</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ PAGE LIVE SIMULATOR MODAL -->
+  <div id="page-simulator-modal" class="simulator-modal">
+    <div class="simulator-shell">
+
+      <!-- Top Bar -->
+      <div class="simulator-topbar">
+        <div class="simulator-info">
+          <span class="simulator-badge">⚡ Aperçu Réel en Direct</span>
+          <span class="simulator-title" id="sim-page-title">Page 1</span>
+        </div>
+        <div class="simulator-nav">
+          <button class="btn" style="padding:6px 12px;" onclick="simPrevPage()">◀ Précédente</button>
+          <span class="sim-page-num" id="sim-page-num">1 / 1</span>
+          <button class="btn" style="padding:6px 12px;" onclick="simNextPage()">Suivante ▶</button>
+        </div>
+        <div class="simulator-tools" style="display:flex; align-items:center; gap:6px;">
+          <button class="btn" id="sim-btn-pen" onclick="toggleSimTool('pen')" title="Stylo / Dessin (crayon interactif)">✏️ Stylo</button>
+          <button class="btn" id="sim-btn-eraser" onclick="toggleSimTool('eraser')" title="Gomme (effacer les traits)">🧹 Gomme</button>
+          <button class="btn" id="sim-btn-loupe" onclick="toggleSimTool('loupe')" title="Loupe Grossissante (inspecter les détails)">🔍 Loupe</button>
+        </div>
+        <div class="simulator-controls">
+          <div id="sim-ambient-pill" class="sim-ambient-pill" style="display:none;" onclick="toggleSimAmbient()">
+            <span>🎵 Ambiance: <strong id="sim-ambient-label">OFF</strong></span>
+          </div>
+          <button class="btn btn-danger" style="padding:6px 14px;" onclick="closePageLivePreview()">✕ Quitter l'Aperçu</button>
+        </div>
+      </div>
+
+      <!-- Simulator Body -->
+      <div class="simulator-body">
+        <div class="sim-page-wrapper">
+          <div class="sim-book-page" id="sim-book-page">
+            <img id="sim-page-img" class="sim-page-img" src="" alt="Aperçu en direct" />
+            <div class="sim-page-shadow"></div>
+            <div id="sim-karaoke-page-layer" class="sim-karaoke-page-layer"></div>
+            <div id="sim-hotspots-container" class="sim-hotspots-container"></div>
+            <canvas id="sim-annot-canvas" class="page-annot-canvas"></canvas>
+            <div id="sim-loupe-lens" class="circular-loupe-lens" style="display:none;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Simulator Floating Annotation Palette -->
+      <div id="sim-annot-palette" class="annot-palette" style="display:none; bottom:64px;">
+        <div class="palette-colors">
+          <div class="color-dot active" style="background:#0ea5e9;" onclick="setSimAnnotColor('#0ea5e9', this)" title="Bleu"></div>
+          <div class="color-dot" style="background:#ef4444;" onclick="setSimAnnotColor('#ef4444', this)" title="Rouge"></div>
+          <div class="color-dot" style="background:#10b981;" onclick="setSimAnnotColor('#10b981', this)" title="Vert"></div>
+          <div class="color-dot highlighter" style="background:#facc15;" onclick="setSimAnnotColor('rgba(250,204,21,0.5)', this, 14)" title="Surligneur Jaune"></div>
+          <div class="color-dot" style="background:#0f172a;" onclick="setSimAnnotColor('#0f172a', this)" title="Noir"></div>
+        </div>
+        <div class="palette-sep"></div>
+        <div class="palette-sizes">
+          <div class="size-dot active" onclick="setSimAnnotSize(2.5, this)" title="Trait Fin"><span>•</span></div>
+          <div class="size-dot" onclick="setSimAnnotSize(5, this)" title="Trait Moyen"><span>●</span></div>
+          <div class="size-dot" onclick="setSimAnnotSize(12, this)" title="Trait Épais"><span>⬤</span></div>
+        </div>
+        <div class="palette-sep"></div>
+        <button class="palette-clear-btn" type="button" onclick="clearSimCurrentPageDrawing()" title="Effacer toutes les annotations de la page">🗑️ Effacer page</button>
+      </div>
+
+      <!-- Simulator Bottom Bar -->
+      <div class="simulator-bottombar">
+        <div class="sim-status-msg" id="sim-status-msg">
+          💡 Cliquez sur <strong>🗣️</strong> pour écouter la synthèse vocale, <strong>🎧</strong> pour lancer l'audio, ou <strong>🔍</strong> pour tester le zoom haute définition.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ LIGHTBOX PREVIEW MODAL -->
+
+  <div id="studio-modal">
+
+    <div id="studio-modal-inner">
+
+      <div id="studio-modal-controls">
+        <span id="modal-title-display" style="font-size:12px; font-weight:700; color:var(--cyan); max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-right:8px;">🔍 Zoom HD</span>
+        <span id="modal-zoom-pct" style="font-size:12px; font-weight:800; color:var(--amber); min-width:44px; text-align:center;">100%</span>
+        <button class="btn" style="padding:4px 8px;" onclick="adjustModalZoom(-0.25)">−</button>
+        <button class="btn" style="padding:4px 8px;" onclick="adjustModalZoom(0.25)">+</button>
+        <button class="btn" style="padding:4px 8px;" onclick="resetModalZoom()">↺</button>
+        <button class="btn btn-danger" style="padding:4px 8px;" onclick="closeStudioModal()">✕ Fermer</button>
+      </div>
+
+      <div id="studio-modal-img-wrap">
+        <img id="studio-modal-img" src="" alt="Zoom Modal" />
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ YOUTUBE VIDEO PREVIEW MODAL -->
+
+  <div id="studio-video-modal" style="display:none; position:fixed; inset:0; z-index:9600; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:16px;" onclick="closeStudioVideoModal()">
+    <div style="position:relative; width:94vw; max-width:1200px; background:#0f172a; border:1px solid #334155; border-radius:16px; overflow:hidden; box-shadow:0 25px 60px rgba(0,0,0,0.85);" onclick="event.stopPropagation()">
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 16px; background:#1e293b; border-bottom:1px solid #334155;">
+        <span id="studio-video-modal-title" style="font-size:13px; font-weight:700; color:#f1f5f9; display:flex; align-items:center; gap:8px;">
+          <span style="color:#ef4444;">▶️</span> Vidéo YouTube
+        </span>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <a id="studio-video-modal-yt-btn" href="#" target="_blank" rel="noopener noreferrer" style="font-size:12px; color:#38bdf8; text-decoration:none; display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px; background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.25);" title="Ouvrir sur YouTube">↗ Ouvrir sur YouTube</a>
+          <button id="studio-video-modal-fs-btn" class="btn btn-secondary" style="padding:4px 8px; font-size:13px;" onclick="toggleStudioVideoFullscreen()" title="Plein écran">⛶</button>
+          <button class="btn btn-danger" style="padding:4px 10px; font-size:12px;" onclick="closeStudioVideoModal()">✕ Fermer</button>
+        </div>
+      </div>
+      <div id="studio-video-modal-wrap" style="position:relative; width:100%; aspect-ratio:16/9; background:#000;">
+        <iframe id="studio-video-modal-iframe" src="" style="width:100%; height:100%; border:none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ CLIENT JAVASCRIPT (MODULAR) -->
+  <script src="studio/js/state.js"></script>
+  <script src="studio/js/api.js"></script>
+  <script src="studio/js/page-manager.js"></script>
+  <script src="studio/js/canvas-engine.js"></script>
+  <script src="studio/js/inspector-engine.js"></script>
+  <script src="studio/js/modals-engine.js"></script>
+  <script src="studio/js/simulator-engine.js"></script>
+  <script src="studio/js/app.js"></script>
+</body>
+</html>

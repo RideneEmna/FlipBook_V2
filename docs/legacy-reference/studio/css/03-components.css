@@ -1,0 +1,339 @@
+/* ══════════════════════════════════════════════════════════
+
+       COMMON CARD & FORM ELEMENTS
+
+    ══════════════════════════════════════════════════════════ */
+
+    .card {
+
+      background: var(--bg-surface);
+
+      border: 1px solid var(--border);
+
+      border-radius: var(--radius);
+
+      padding: 22px 24px;
+
+      backdrop-filter: blur(16px);
+
+      box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+
+      margin-bottom: 20px;
+
+    }
+
+    .card-title {
+
+      font-size: 16px;
+
+      font-weight: 700;
+
+      color: #f8fafc;
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 10px;
+
+      margin-bottom: 16px;
+
+    }
+
+    .card-title .icon {
+
+      font-size: 18px;
+
+    }
+
+    .form-group {
+
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 6px;
+
+      margin-top: 14px;
+
+    }
+
+    .form-group label {
+
+      font-size: 12px;
+
+      font-weight: 600;
+
+      color: var(--text-muted);
+
+      text-transform: uppercase;
+
+      letter-spacing: 0.03em;
+
+    }
+
+    .input-with-btn {
+
+      display: flex;
+
+      gap: 8px;
+
+      align-items: center;
+
+    }
+
+    .input-text, .input-select, .input-textarea {
+
+      flex: 1;
+
+      min-width: 0; /* Empêche le dépassement */
+
+      padding: 10px 14px;
+
+      background: var(--bg-darker);
+
+      border: 1px solid var(--border);
+
+      border-radius: var(--radius-sm);
+
+      color: #fff;
+
+      font-size: 13px;
+
+      font-family: inherit;
+
+      outline: none;
+
+      transition: border-color 0.15s, box-shadow 0.15s;
+
+    }
+
+    .input-text:focus, .input-select:focus, .input-textarea:focus {
+
+      border-color: var(--cyan);
+
+      box-shadow: 0 0 0 3px rgba(0, 162, 237, 0.25);
+
+    }
+
+    .input-textarea {
+
+      resize: vertical;
+
+      min-height: 72px;
+
+      line-height: 1.45;
+
+    }
+
+    .btn {
+
+      padding: 10px 16px;
+
+      background: #1e293b;
+
+      border: 1px solid var(--border);
+
+      color: #f1f5f9;
+
+      font-size: 13px;
+
+      font-weight: 700;
+
+      border-radius: var(--radius-sm);
+
+      cursor: pointer;
+
+      display: inline-flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      gap: 6px;
+
+      white-space: nowrap;
+
+      transition: all 0.15s ease;
+
+      user-select: none;
+
+    }
+
+    .btn:hover {
+
+      background: #334155;
+
+      border-color: var(--cyan);
+
+      color: var(--cyan-light);
+
+    }
+
+    .btn-primary {
+
+      background: linear-gradient(135deg, #00a2ed 0%, #0077b6 100%);
+
+      border: none;
+
+      color: #fff;
+
+      box-shadow: 0 4px 16px var(--cyan-glow);
+
+    }
+
+    .btn-primary:hover {
+
+      background: linear-gradient(135deg, #38bdf8 0%, #0096c7 100%);
+
+      transform: translateY(-1px);
+
+      box-shadow: 0 6px 20px rgba(0, 162, 237, 0.5);
+
+      color: #fff;
+
+    }
+
+    .btn-success {
+
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+
+      border: none;
+
+      color: #fff;
+
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35);
+
+    }
+
+    .btn-success:hover {
+
+      background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+
+      color: #fff;
+
+      transform: translateY(-1px);
+
+    }
+
+    .btn-amber {
+
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+
+      border: none;
+
+      color: #070a13;
+
+      font-weight: 800;
+
+      box-shadow: 0 4px 14px var(--amber-glow);
+
+    }
+
+    .btn-amber:hover {
+
+      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+
+      color: #070a13;
+
+    }
+
+    .btn-danger {
+
+      background: rgba(239, 68, 68, 0.15);
+
+      border: 1px solid rgba(239, 68, 68, 0.4);
+
+      color: #fca5a5;
+
+    }
+
+    .btn-danger:hover {
+
+      background: var(--danger);
+
+      color: #fff;
+
+    }
+
+    /* ══════════════════════════════════════════════════════════
+
+       STEP 1: UPLOAD / SETUP
+
+    ══════════════════════════════════════════════════════════ */
+
+    .drop-zone {
+
+      border: 2px dashed rgba(51, 65, 85, 0.9);
+
+      border-radius: 12px;
+
+      padding: 34px 20px;
+
+      text-align: center;
+
+      cursor: pointer;
+
+      background: rgba(15, 23, 42, 0.5);
+
+      transition: all 0.2s ease;
+
+    }
+
+    .drop-zone:hover, .drop-zone.dragover {
+
+      border-color: var(--cyan);
+
+      background: rgba(0, 162, 237, 0.08);
+
+      box-shadow: 0 0 24px rgba(0, 162, 237, 0.2);
+
+    }
+
+    .drop-icon { font-size: 42px; margin-bottom: 8px; }
+
+    .drop-text { font-size: 15px; font-weight: 700; color: #e2e8f0; margin-bottom: 4px; }
+
+    .drop-subtext { font-size: 12px; color: var(--text-muted); }
+
+    .dpi-pills { display: flex; gap: 8px; }
+
+    .dpi-pill {
+
+      flex: 1;
+
+      padding: 10px;
+
+      border-radius: var(--radius-sm);
+
+      border: 1px solid var(--border);
+
+      background: var(--bg-darker);
+
+      color: var(--text-muted);
+
+      font-size: 12px;
+
+      font-weight: 700;
+
+      text-align: center;
+
+      cursor: pointer;
+
+      transition: all 0.15s;
+
+    }
+
+    .dpi-pill:hover { border-color: var(--cyan); color: #fff; }
+
+    .dpi-pill.active {
+
+      border-color: var(--cyan);
+
+      background: rgba(0, 162, 237, 0.15);
+
+      color: var(--cyan-light);
+
+      box-shadow: 0 0 12px var(--cyan-glow);
+
+    }

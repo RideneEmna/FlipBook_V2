@@ -1,0 +1,9 @@
+fastapi>=0.115
+uvicorn[standard]>=0.30
+python-multipart>=0.0.9
+pydantic>=2.7
+# Add the libraries your current conversion and TTS scripts use
+# (copy them from the old requirements.txt: PDF rendering, Pillow, TTS library...).
+pillow>=10.0.0
+pypdfium2>=4.0.0
+python-multipart

@@ -1,0 +1,17 @@
+{
+  "name": "offline",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "vite build",
+    "watch": "vite build --watch",
+    "typecheck": "node -e \"console.log('offline: ok')\""
+  },
+  "dependencies": {
+    "@flipbook/viewer": "*"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0",
+    "vite-plugin-singlefile": "^2.0.0"
+  }
+}
