@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useMemo, useRef } from 'react';
-import StudioStepper from '@/components/Studio/StudioStepper';
 import type { StudioConfigPage, InteractiveToolKey, InteractiveItem } from './page-config/types';
 import type { ConversionSettings } from './ConversionOptions';
 import { uploadPDF, watchJobProgress, BASE, getBaseUrl } from '@/lib/studioApi';
@@ -42,6 +41,7 @@ interface Props {
   pdfFile: File | null;
   settings: ConversionSettings;
   onBackToConfig: () => void;
+  onBackToUpload?: () => void;
 }
 
 export default function StudioFinalConversionView({
@@ -49,6 +49,7 @@ export default function StudioFinalConversionView({
   pdfFile,
   settings,
   onBackToConfig,
+  onBackToUpload,
 }: Props) {
   const [selectedFormat, setSelectedFormat] = useState<'flipbook' | 'slides'>('flipbook');
   const [isConverting, setIsConverting] = useState<boolean>(false);
@@ -573,9 +574,10 @@ export default function StudioFinalConversionView({
             const safeTitle = rawTitle.replace(/[^a-zA-Z0-9_-]/g, '_');
             const JSZip = (await import('jszip')).default;
             const zip = new JSZip();
-            zip.file(`${safeTitle}.flipbook.json`, JSON.stringify(projectData, null, 2));
             const batContent = `@echo off\r\nchcp 65001 >nul\r\ntitle Flipbook Studio Pro\r\nif not exist "%~dp0index.html" (\r\n    echo ======================================================================\r\n    echo   ATTENTION : ARCHIVE ZIP NON EXTRAITE !\r\n    echo ======================================================================\r\n    echo   Veuillez extraire l'archive (Clic droit ^> Extraire tout)\r\n    echo   avant d'executer Ouvrir_Flipbook.bat.\r\n    echo ======================================================================\r\n    pause\r\n    exit /b 1\r\n)\r\nstart "" "%~dp0index.html"\r\n`;
             zip.file('Ouvrir_Flipbook.bat', batContent);
+            const kioskBatContent = `@echo off\r\nchcp 65001 >nul\r\ntitle Flipbook Studio Pro - Mode Kiosque Plein Ecran\r\nif not exist "%~dp0index.html" (\r\n    pause\r\n    exit /b 1\r\n)\r\necho Demarrage du mode Kiosque plein ecran...\r\necho (Pour quitter a tout moment : cliquez sur le bouton [X Quitter] ou appuyez sur Alt+F4)\r\nstart msedge --app="%~dp0index.html?kiosk=1" --start-fullscreen 2>nul || start msedge --kiosk "%~dp0index.html?kiosk=1" 2>nul || start chrome --app="%~dp0index.html?kiosk=1" --start-fullscreen 2>nul || start chrome --kiosk "%~dp0index.html?kiosk=1" 2>nul || start "" "%~dp0index.html"\r\n`;
+            zip.file('Lancer_Mode_Kiosque.bat', kioskBatContent);
             blob = await zip.generateAsync({ type: 'blob' });
           }
 
@@ -599,7 +601,7 @@ export default function StudioFinalConversionView({
     if (lastJobId) {
       const baseUrl = getBaseUrl();
       const a = document.createElement('a');
-      a.href = `${baseUrl}/export/${lastJobId}`;
+      a.href = `${baseUrl}/export/${lastJobId}?format=${selectedFormat}`;
       a.download = zipDownloadName;
       document.body.appendChild(a);
       a.click();
@@ -624,26 +626,6 @@ export default function StudioFinalConversionView({
       <div className="absolute bottom-10 right-10 w-96 h-96 bg-purple-600/15 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-4xl mx-auto px-4 py-8 relative z-10 flex-1 flex flex-col justify-center w-full">
-        {/* 1. HEADER & TAG */}
-        <header className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-semibold mb-4 shadow-inner">
-            <Sparkles className="w-4 h-4 animate-pulse" />
-            <span>Flipbook Studio Pro · Éditeur Interactif</span>
-          </div>
-
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white mb-3 bg-gradient-to-r from-white via-indigo-200 to-indigo-400 bg-clip-text text-transparent">
-            Convertisseur &amp; Configurateur de Flipbook
-          </h1>
-          <p className="text-slate-400 text-sm md:text-base max-w-xl mx-auto">
-            Configurez chaque page (textes à lire, modales HD, pistes audio) avant
-            de compiler votre Flipbook HTML5 autonome.
-          </p>
-        </header>
-
-        {/* 2. PROGRESS BAR (Phase Three Activated) */}
-        <div className="mb-8">
-          <StudioStepper currentStep={3} />
-        </div>
 
         {/* 3. MAIN DASHBOARD CONTAINER */}
         <div className="glass-panel rounded-3xl p-6 md:p-8 shadow-2xl glow-effect space-y-6">
@@ -862,24 +844,35 @@ export default function StudioFinalConversionView({
               {/* Option 1: Flipbook */}
               <button
                 type="button"
-                onClick={() => setSelectedFormat('flipbook')}
-                className={`p-5 rounded-2xl text-left transition-all relative flex flex-col justify-between group ${
-                  selectedFormat === 'flipbook'
+                onClick={() => {
+                  setSelectedFormat('flipbook');
+                  if (lastJobId) {
+                    const baseUrl = getBaseUrl();
+                    fetch(`${baseUrl}/export/save`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        jobId: lastJobId,
+                        project: buildProjectJson(),
+                        format: 'flipbook',
+                      }),
+                    }).catch(() => { });
+                  }
+                }}
+                className={`p-5 rounded-2xl text-left transition-all relative flex flex-col justify-between group ${selectedFormat === 'flipbook'
                     ? 'bg-indigo-600/20 border-2 border-indigo-500 shadow-lg'
                     : 'bg-slate-900/90 border border-slate-800 hover:border-slate-700'
-                }`}
+                  }`}
               >
                 <div
-                  className={`absolute top-4 right-4 w-6 h-6 rounded-full flex items-center justify-center text-xs transition ${
-                    selectedFormat === 'flipbook'
+                  className={`absolute top-4 right-4 w-6 h-6 rounded-full flex items-center justify-center text-xs transition ${selectedFormat === 'flipbook'
                       ? 'bg-indigo-600 text-white'
                       : 'bg-slate-800 text-slate-500'
-                  }`}
+                    }`}
                 >
                   <Check
-                    className={`w-3.5 h-3.5 ${
-                      selectedFormat === 'flipbook' ? 'opacity-100' : 'opacity-0'
-                    }`}
+                    className={`w-3.5 h-3.5 ${selectedFormat === 'flipbook' ? 'opacity-100' : 'opacity-0'
+                      }`}
                   />
                 </div>
                 <div>
@@ -899,24 +892,35 @@ export default function StudioFinalConversionView({
               {/* Option 2: Normal Slides */}
               <button
                 type="button"
-                onClick={() => setSelectedFormat('slides')}
-                className={`p-5 rounded-2xl text-left transition-all relative flex flex-col justify-between group ${
-                  selectedFormat === 'slides'
+                onClick={() => {
+                  setSelectedFormat('slides');
+                  if (lastJobId) {
+                    const baseUrl = getBaseUrl();
+                    fetch(`${baseUrl}/export/save`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        jobId: lastJobId,
+                        project: buildProjectJson(),
+                        format: 'slides',
+                      }),
+                    }).catch(() => { });
+                  }
+                }}
+                className={`p-5 rounded-2xl text-left transition-all relative flex flex-col justify-between group ${selectedFormat === 'slides'
                     ? 'bg-indigo-600/20 border-2 border-indigo-500 shadow-lg'
                     : 'bg-slate-900/90 border border-slate-800 hover:border-slate-700'
-                }`}
+                  }`}
               >
                 <div
-                  className={`absolute top-4 right-4 w-6 h-6 rounded-full flex items-center justify-center text-xs transition ${
-                    selectedFormat === 'slides'
+                  className={`absolute top-4 right-4 w-6 h-6 rounded-full flex items-center justify-center text-xs transition ${selectedFormat === 'slides'
                       ? 'bg-indigo-600 text-white'
                       : 'bg-slate-800 text-slate-500'
-                  }`}
+                    }`}
                 >
                   <Check
-                    className={`w-3.5 h-3.5 ${
-                      selectedFormat === 'slides' ? 'opacity-100' : 'opacity-0'
-                    }`}
+                    className={`w-3.5 h-3.5 ${selectedFormat === 'slides' ? 'opacity-100' : 'opacity-0'
+                      }`}
                   />
                 </div>
                 <div>
@@ -994,9 +998,19 @@ export default function StudioFinalConversionView({
             </div>
           )}
 
-          {/* Launch Conversion Primary Button (Shown before launch or on retry) */}
+          {/* Launch Conversion Primary Button & Back to Step 2 Button */}
           {!isConverting && !isCompleted && (
-            <div className="pt-4 border-t border-slate-800 flex justify-end">
+            <div className="pt-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={onBackToConfig}
+                className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white font-semibold text-sm border border-slate-700/80 transition flex items-center justify-center gap-2 active:scale-95 shadow-sm"
+                title="Revenir à la configuration des pages (Étape 2)"
+              >
+                <ArrowLeft className="w-4 h-4 text-indigo-400" />
+                <span>Retour à la configuration des pages</span>
+              </button>
+
               <button
                 type="button"
                 onClick={startConversion}
@@ -1011,8 +1025,7 @@ export default function StudioFinalConversionView({
 
         <footer className="text-center mt-8 text-slate-500 text-xs">
           <p>
-            Flipbook Studio Pro &copy; 2026 &bull; Moteur de compilation HTML5
-            autonome
+            Flipbook Studio Pro &copy; 2026 &bull; Compilateur Web
           </p>
         </footer>
       </div>

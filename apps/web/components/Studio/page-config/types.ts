@@ -30,6 +30,7 @@ export interface ToolDef {
   w?: number;
   h?: number;
   hint: string;
+  hidden?: boolean;
 }
 
 export const TOOL_DEFS: Record<InteractiveToolKey, ToolDef> = {
@@ -120,6 +121,7 @@ export const TOOL_DEFS: Record<InteractiveToolKey, ToolDef> = {
     c: '#ec4899',
     k: 'rect',
     hint: 'Définissez la zone ou illustration où les élèves peuvent colorier librement au pot de peinture.',
+    hidden: true,
   },
   colorCorrect: {
     n: 'Colorier les bons dessins',
@@ -134,6 +136,7 @@ export const TOOL_DEFS: Record<InteractiveToolKey, ToolDef> = {
     c: '#ec4899',
     k: 'lasso',
     hint: 'Tracez la zone fermée que les élèves pourront colorier au pot de peinture.',
+    hidden: true,
   },
   arrow: {
     n: 'Flèches',

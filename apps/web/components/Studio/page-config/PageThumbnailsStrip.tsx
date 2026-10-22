@@ -15,6 +15,8 @@ interface Props {
   onImportPdfPages: (doc: any, fileName: string) => void;
   onReorderPages: (fromIdx: number, toIdx: number) => void;
   onToast: (msg: string) => void;
+  /** 'strip' (défaut) = bande horizontale ; 'grid' = grille 2 colonnes (sidebar). */
+  layout?: 'strip' | 'grid';
 }
 
 export default function PageThumbnailsStrip({
@@ -27,7 +29,26 @@ export default function PageThumbnailsStrip({
   onImportPdfPages,
   onReorderPages,
   onToast,
+  layout = 'strip',
 }: Props) {
+  const isGrid = layout === 'grid';
+  const [jumpValue, setJumpValue] = useState('');
+  const currentCardRef = useRef<HTMLDivElement | null>(null);
+
+  // Keep the current page visible in the sidebar grid
+  useEffect(() => {
+    if (isGrid) currentCardRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [isGrid, currentPageIndex]);
+
+  const handleJump = () => {
+    const n = parseInt(jumpValue, 10);
+    if (!Number.isFinite(n) || n < 1 || n > pages.length) {
+      onToast(`Entrez un numéro entre 1 et ${pages.length}.`);
+      return;
+    }
+    onSelectPage(n - 1);
+    setJumpValue('');
+  };
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [overIndex, setOverIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -47,18 +68,49 @@ export default function PageThumbnailsStrip({
   };
 
   return (
-    <div className="mt-6 pt-5 border-t border-slate-800">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-bold text-white flex items-center gap-2">
-          <LayoutGrid className="w-4 h-4 text-indigo-400" />
-          <span>Table des pages</span>
-        </h3>
-        <span className="text-xs text-slate-500">
-          Glissez une vignette pour changer l'ordre
-        </span>
-      </div>
+    <div className={isGrid ? 'flex flex-col gap-3' : 'mt-6 pt-5 border-t border-slate-800'}>
+      {isGrid ? (
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            min={1}
+            max={pages.length}
+            value={jumpValue}
+            onChange={(e) => setJumpValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleJump();
+            }}
+            placeholder={`Aller à la page (1-${pages.length})`}
+            aria-label="Aller à la page"
+            className="flex-1 min-w-0 px-3 py-1.5 rounded-lg bg-slate-900/80 border border-slate-700/60 text-xs text-slate-100 focus:outline-none focus:border-indigo-500"
+          />
+          <button
+            type="button"
+            onClick={handleJump}
+            className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition active:scale-95"
+          >
+            OK
+          </button>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-bold text-white flex items-center gap-2">
+            <LayoutGrid className="w-4 h-4 text-indigo-400" />
+            <span>Table des pages</span>
+          </h3>
+          <span className="text-xs text-slate-500">
+            Glissez une vignette pour changer l'ordre
+          </span>
+        </div>
+      )}
 
-      <div className="flex gap-3 overflow-x-auto pb-3 custom-scrollbar">
+      <div
+        className={
+          isGrid
+            ? 'grid grid-cols-2 gap-2.5 pr-1'
+            : 'flex gap-3 overflow-x-auto pb-3 custom-scrollbar'
+        }
+      >
         {pages.map((p, idx) => {
           const isCurrent = idx === currentPageIndex;
           const isOver = idx === overIndex && draggedIndex !== null && draggedIndex !== idx;
@@ -66,6 +118,7 @@ export default function PageThumbnailsStrip({
           return (
             <div
               key={p.id}
+              ref={isCurrent ? currentCardRef : undefined}
               draggable
               onDragStart={(e) => {
                 setDraggedIndex(idx);
@@ -90,7 +143,8 @@ export default function PageThumbnailsStrip({
               }}
               onClick={() => onSelectPage(idx)}
               className={[
-                'group relative flex-none w-[104px] rounded-xl p-1.5 transition-all cursor-grab active:cursor-grabbing border select-none',
+                'group relative rounded-xl p-1.5 transition-all cursor-grab active:cursor-grabbing border select-none',
+                isGrid ? 'w-full' : 'flex-none w-[104px]',
                 isCurrent
                   ? 'border-indigo-500 bg-indigo-600/20 shadow-md ring-1 ring-indigo-500'
                   : 'border-slate-800 bg-slate-900/70 hover:border-indigo-500/60',
@@ -149,7 +203,7 @@ export default function PageThumbnailsStrip({
         <button
           type="button"
           onClick={onAddBlankPage}
-          className="flex-none w-[104px] rounded-xl border-2 border-dashed border-indigo-500/35 hover:border-indigo-500 bg-slate-900/40 hover:bg-indigo-600/10 text-indigo-300 hover:text-white text-[11px] font-semibold flex flex-col items-center justify-center gap-1.5 p-2.5 text-center transition-all active:scale-95"
+          className={`${isGrid ? 'w-full min-h-[96px]' : 'flex-none w-[104px]'} rounded-xl border-2 border-dashed border-indigo-500/35 hover:border-indigo-500 bg-slate-900/40 hover:bg-indigo-600/10 text-indigo-300 hover:text-white text-[11px] font-semibold flex flex-col items-center justify-center gap-1.5 p-2.5 text-center transition-all active:scale-95`}
         >
           <FilePlus2 className="w-5 h-5 text-indigo-400" />
           <span>Ajouter une page blanche</span>
@@ -159,7 +213,7 @@ export default function PageThumbnailsStrip({
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="flex-none w-[104px] rounded-xl border-2 border-dashed border-indigo-500/35 hover:border-indigo-500 bg-slate-900/40 hover:bg-indigo-600/10 text-indigo-300 hover:text-white text-[11px] font-semibold flex flex-col items-center justify-center gap-1.5 p-2.5 text-center transition-all active:scale-95 cursor-pointer"
+          className={`${isGrid ? 'w-full min-h-[96px]' : 'flex-none w-[104px]'} rounded-xl border-2 border-dashed border-indigo-500/35 hover:border-indigo-500 bg-slate-900/40 hover:bg-indigo-600/10 text-indigo-300 hover:text-white text-[11px] font-semibold flex flex-col items-center justify-center gap-1.5 p-2.5 text-center transition-all active:scale-95 cursor-pointer`}
         >
           <FileUp className="w-5 h-5 text-indigo-400" />
           <span>Importer des pages d'un PDF</span>

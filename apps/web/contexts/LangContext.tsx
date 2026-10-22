@@ -15,10 +15,17 @@ const LangContext = createContext<LangContextValue | null>(null);
 export function LangProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>('fr');
 
-  // On mount: read persisted locale
+  // On mount: default to French, clear any stale Arabic preference
   useEffect(() => {
-    const stored = localStorage.getItem('locale') as Locale | null;
-    if (stored === 'fr' || stored === 'ar') setLocaleState(stored);
+    try {
+      if (localStorage.getItem('locale') === 'ar') {
+        localStorage.setItem('locale', 'fr');
+      }
+      if (localStorage.getItem('flipbook_lang') === 'ar') {
+        localStorage.removeItem('flipbook_lang');
+      }
+    } catch (e) {}
+    setLocaleState('fr');
   }, []);
 
   // Sync <html lang> and <body dir> for screen readers and CSS :lang(ar) selector

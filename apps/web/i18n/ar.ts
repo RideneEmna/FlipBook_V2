@@ -80,5 +80,6 @@ export const ar: Translations = {
     lightMode: 'الوضع الفاتح',
     darkMode: 'الوضع الداكن',
     langToggle: 'Français',
+    installPwa: 'تثبيت التطبيق (وضع ملء الشاشة)',
   },
 };

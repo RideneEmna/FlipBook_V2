@@ -3,7 +3,6 @@
 import { useRef, useState } from 'react';
 import { Sparkles, FolderOpenDot, ArrowRight } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
-import StudioStepper from './StudioStepper';
 import UploadDropzone from './UploadDropzone';
 import SourceAndDestinationInputs from './SourceAndDestinationInputs';
 import ProjectMetaAndDpi from './ProjectMetaAndDpi';
@@ -15,6 +14,9 @@ type Props = {
   onSubmit: (file: File) => void;
   onOpenProject?: (projectFile: File) => void;
   disabled?: boolean;
+  initialFile?: File | null;
+  canGoToConfig?: boolean;
+  onGoToConfig?: () => void;
 };
 
 export default function StudioUploadView({
@@ -23,10 +25,19 @@ export default function StudioUploadView({
   onSubmit,
   onOpenProject,
   disabled = false,
+  initialFile = null,
+  canGoToConfig = false,
+  onGoToConfig,
 }: Props) {
   const t = useTranslation();
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [title, setTitle] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(() => initialFile || null);
+  const [title, setTitle] = useState(() => {
+    if (initialFile) {
+      const cleanName = initialFile.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+      return cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+    }
+    return '';
+  });
   const [subtitle, setSubtitle] = useState('');
   const [destFolder, setDestFolder] = useState('./dist/flipbook-output');
   const [errorLocal, setErrorLocal] = useState<string | null>(null);
@@ -83,8 +94,7 @@ export default function StudioUploadView({
           </p>
         </header>
 
-        {/* Stepper Card */}
-        <StudioStepper currentStep={1} />
+
 
         {/* Local Validation Error Banner */}
         {errorLocal && (

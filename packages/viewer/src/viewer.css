@@ -2110,3 +2110,237 @@ body[data-tool="bucket"] .widget-drawing-zone:hover {
   background: rgba(34, 197, 94, 0.1);
   box-shadow: 0 0 12px rgba(34, 197, 94, 0.35);
 }
+
+/* ==========================================================================
+   LANGUAGE SWITCHER BUTTON
+   ========================================================================== */
+.lang-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: var(--field);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  white-space: nowrap;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.lang-btn:hover {
+  background: color-mix(in srgb, var(--brand) 18%, transparent);
+  border-color: var(--brand);
+  color: #fff;
+  transform: translateY(-0.5px);
+}
+
+.lang-btn .lang-globe {
+  font-size: 13px;
+  line-height: 1;
+}
+
+/* ==========================================================================
+   KIOSK MODE EXIT BUTTON
+   ========================================================================== */
+.kiosk-exit-btn {
+  display: none;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(239, 68, 68, 0.18);
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  color: #fca5a5;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.kiosk-exit-btn:hover {
+  background: #ef4444;
+  border-color: #dc2626;
+  color: #ffffff;
+  transform: scale(1.04);
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.6);
+}
+
+.kiosk-exit-btn .i {
+  width: 13px;
+  height: 13px;
+}
+
+/* ==========================================================================
+   SCORE PANEL STYLES
+   ========================================================================== */
+.score-panel {
+  position: fixed;
+  bottom: 80px;
+  right: 16px;
+  z-index: 500;
+  background: rgba(15, 23, 42, 0.96);
+  border: 1px solid #334155;
+  border-radius: 14px;
+  padding: 12px 16px;
+  min-width: 180px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-size: 12px;
+  color: #e2e8f0;
+  font-family: inherit;
+  animation: fb-fadein 0.2s ease;
+}
+
+.score-panel h4 {
+  margin: 0 0 8px 0;
+  font-size: 11px;
+  font-weight: 800;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.score-num {
+  font-size: 26px;
+  font-weight: 900;
+  color: #34d399;
+  text-align: center;
+  display: block;
+  line-height: 1;
+}
+
+.score-sub {
+  font-size: 11px;
+  color: #94a3b8;
+  text-align: center;
+  display: block;
+  margin-top: 4px;
+}
+
+.score-bar-wrap {
+  height: 6px;
+  background: #1e293b;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.score-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #34d399);
+  border-radius: 999px;
+  transition: width 0.5s ease;
+}
+
+.score-btns {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.score-btn {
+  flex: 1;
+  padding: 5px 8px;
+  border-radius: 8px;
+  border: 1px solid #475569;
+  background: #1e293b;
+  color: #f1f5f9;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.score-btn:hover {
+  background: #334155;
+  border-color: #64748b;
+}
+
+.score-btn.validate-btn {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  border-color: #ea580c;
+  color: #ffffff;
+}
+
+.score-btn.validate-btn:hover {
+  filter: brightness(1.1);
+}
+
+@keyframes fb-fadein {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   RTL SUPPORT (ARABIC)
+   ========================================================================== */
+[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Arabic", "Cairo", Tahoma, sans-serif;
+}
+
+[dir="rtl"] h1#bTitle,
+[dir="rtl"] .toc-head b,
+[dir="rtl"] .modal-header h3 {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Arabic", "Cairo", sans-serif;
+  letter-spacing: 0;
+}
+
+[dir="rtl"] .score-panel {
+  right: auto;
+  left: 16px;
+  text-align: right;
+}
+
+[dir="rtl"] .modal-header h3 span,
+[dir="rtl"] #video-modal-title span {
+  margin-right: 0 !important;
+  margin-left: 6px !important;
+}
+
+/* PWA Install Button */
+.pwa-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: color-mix(in srgb, var(--brand) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--brand) 45%, transparent);
+  color: var(--ink);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pwa-btn:hover {
+  background: color-mix(in srgb, var(--brand) 30%, transparent);
+  border-color: var(--brand);
+  transform: translateY(-1px);
+}
+
+/* Kiosk Mode (Fullscreen PWA display) */
+.is-kiosk {
+  width: 100vw !important;
+  height: 100vh !important;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
+}
+
+.is-kiosk .top {
+  padding-left: clamp(12px, 3vw, 28px);
+  padding-right: clamp(12px, 3vw, 28px);
+}
+
+@media (display-mode: fullscreen), (display-mode: standalone) {
+  #btnInstallPwa {
+    display: none !important;
+  }
+}

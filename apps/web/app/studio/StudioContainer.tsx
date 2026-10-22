@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import StudioUploadView from '@/components/Studio/StudioUploadView';
-import StudioStepper from '@/components/Studio/StudioStepper';
+import StudioHeader from '@/components/StudioHeader';
 import StudioPageConfigView from '@/components/Studio/StudioPageConfigView';
 import StudioFinalConversionView from '@/components/Studio/StudioFinalConversionView';
 import type { StudioConfigPage } from '@/components/Studio/page-config/types';
@@ -63,9 +63,11 @@ export default function StudioContainer() {
 
   // Step 1 primary submit: moves to Step 2 ("Configuration des pages")
   const handleUploadSubmit = (file: File) => {
+    if (uploadedFile && (uploadedFile.name !== file.name || uploadedFile.size !== file.size)) {
+      setConfiguredPages([]);
+    }
     setUploadedFile(file);
     setInitialJsonProject(null);
-    setConfiguredPages([]);
     setPhase('config');
   };
 
@@ -86,6 +88,21 @@ export default function StudioContainer() {
     setPhase('final_conversion');
   };
 
+  // Navigate back to upload while preserving existing configured pages
+  const handleBackToUpload = (currentPages?: StudioConfigPage[]) => {
+    if (currentPages && currentPages.length > 0) {
+      setConfiguredPages(currentPages);
+    }
+    setPhase('idle');
+  };
+
+  // Navigate forward to config if already reached
+  const handleGoToConfig = () => {
+    if (uploadedFile || initialJsonProject) {
+      setPhase('config');
+    }
+  };
+
   const busy = phase === 'uploading' || phase === 'converting';
 
   // Step 2: Full Page Configuration View
@@ -96,6 +113,7 @@ export default function StudioContainer() {
         initialProjectJsonFile={initialJsonProject}
         persistedPages={configuredPages}
         onProceedToConversion={handleProceedToConversion}
+        onBackToUpload={handleBackToUpload}
       />
     );
   }
@@ -108,55 +126,59 @@ export default function StudioContainer() {
         pdfFile={uploadedFile}
         settings={settings}
         onBackToConfig={() => setPhase('config')}
+        onBackToUpload={handleBackToUpload}
       />
     );
   }
 
   return (
-    <main className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-8 relative z-10">
-      {/* Global Error Banner */}
-      {phase === 'error' && fileConversion.error && (
-        <Alert variant="danger">{fileConversion.error}</Alert>
-      )}
+    <>
+      <StudioHeader />
+      <main className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-8 relative z-10">
+        {/* Global Error Banner */}
+        {phase === 'error' && fileConversion.error && (
+          <Alert variant="danger">{fileConversion.error}</Alert>
+        )}
 
-      {/* 1. Step 1: Upload document PDF */}
-      {(phase === 'idle' || phase === 'error') && (
-        <StudioUploadView
-          settings={settings}
-          onSettingsChange={setSettings}
-          onSubmit={handleUploadSubmit}
-          onOpenProject={handleOpenProjectJson}
-          disabled={busy}
-        />
-      )}
+        {/* 1. Step 1: Upload document PDF */}
+        {(phase === 'idle' || phase === 'error') && (
+          <StudioUploadView
+            settings={settings}
+            onSettingsChange={setSettings}
+            onSubmit={handleUploadSubmit}
+            onOpenProject={handleOpenProjectJson}
+            disabled={busy}
+            initialFile={uploadedFile}
+            canGoToConfig={Boolean((uploadedFile || initialJsonProject) && configuredPages.length > 0)}
+            onGoToConfig={handleGoToConfig}
+          />
+        )}
 
-      {/* 2. Step 3 in progress: Uploading & Converting Phase */}
-      {busy && (
-        <section className="flex flex-col gap-6">
-          <StudioStepper currentStep={3} />
-          <div className="flex flex-col gap-2 rounded-card border border-surface-border bg-surface-card p-6 shadow-sm">
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-semibold text-text-base">
-                📄 {uploadedFile ? uploadedFile.name : fileConversion.fileName || 'Flipbook'}
-              </span>
-              <span className="text-xs text-text-muted">
-                {settings.dpi} DPI · {progressQuality(settings.quality)}
-              </span>
+        {/* 2. Step 3 in progress: Uploading & Converting Phase */}
+        {busy && (
+          <section className="flex flex-col gap-6">
+            <div className="flex flex-col gap-2 rounded-card border border-surface-border bg-surface-card p-6 shadow-sm">
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-semibold text-text-base">
+                  📄 {uploadedFile ? uploadedFile.name : fileConversion.fileName || 'Flipbook'}
+                </span>
+                <span className="text-xs text-text-muted">
+                  {settings.dpi} DPI · {progressQuality(settings.quality)}
+                </span>
+              </div>
+              <ProgressBar
+                percent={jobProgress.progress.percent}
+                step={jobProgress.progress.step}
+                message={jobProgress.progress.message}
+              />
             </div>
-            <ProgressBar
-              percent={jobProgress.progress.percent}
-              step={jobProgress.progress.step}
-              message={jobProgress.progress.message}
-            />
-          </div>
-        </section>
-      )}
+          </section>
+        )}
 
-      {/* 3. Step 3 completed: Final Flipbook Compilation Ready */}
-      {phase === 'done' && (
-        <section className="flex flex-col gap-6">
-          <StudioStepper currentStep={3} />
-          <div className="flex flex-col gap-5 rounded-card border border-surface-border bg-surface-card p-6 shadow-sm">
+        {/* 3. Step 3 completed: Final Flipbook Compilation Ready */}
+        {phase === 'done' && (
+          <section className="flex flex-col gap-6">
+            <div className="flex flex-col gap-5 rounded-card border border-surface-border bg-surface-card p-6 shadow-sm">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-surface-border pb-4">
               <div>
                 <h2 className="text-lg font-bold text-text-base">
@@ -192,7 +214,8 @@ export default function StudioContainer() {
         </section>
       )}
     </main>
-  );
+  </>
+);
 }
 
 function progressQuality(q: number) {

@@ -4,6 +4,7 @@ import { PageFlip } from 'page-flip';
 import lottie from 'lottie-web';
 import iconUrl from './assets/icone.png';
 import LOTTIE_SUCCESS_DATA from './assets/lottie-success.json';
+import { TRANSLATIONS } from './i18n.js';
 import './viewer.css';
 
 function esc(text) {
@@ -12,9 +13,12 @@ function esc(text) {
     return div.innerHTML;
 }
 
-function shellHtml(title, subtitle, total) {
+function shellHtml(title, subtitle, total, startMode = 'flipbook', lang = 'fr') {
+    const isSlides = (startMode === 'slides');
+    const t = TRANSLATIONS[lang] || TRANSLATIONS.fr;
+    const isRtl = (lang === 'ar');
     return `
-<div class="app" id="app">
+<div class="app" id="app"${isRtl ? ' dir="rtl" lang="ar"' : ' dir="ltr" lang="fr"'}>
   <!-- ═══════════════════════════════════════════════════ TOP BAR -->
   <header class="top" id="topHeader">
     <div class="brand">
@@ -29,44 +33,57 @@ function shellHtml(title, subtitle, total) {
 
     <div class="top-right">
       <!-- Segmented Mode Switcher (Flipbook / Diapositives) -->
-      <div class="mode-switch" role="group" aria-label="Mode d'affichage">
-        <button type="button" class="mode-btn active" id="btnModeFlipbook" onclick="setViewerMode('flipbook')" title="Mode Flipbook 3D (Livre interactif)">
+      <div class="mode-switch" role="group" aria-label="${esc(t.modeSwitchAria)}">
+        <button type="button" class="mode-btn ${isSlides ? '' : 'active'}" id="btnModeFlipbook" onclick="setViewerMode('flipbook')" title="${esc(t.flipbookModeTitle)}">
           <svg class="i" viewBox="0 0 24 24"><path d="M12 6c-2-1.5-5-2-8-1.5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5v-13C17 4 14 4.5 12 6z"/><path d="M12 6v13"/></svg>
-          <span>Flipbook</span>
+          <span id="btnModeFlipbookText">${esc(t.flipbookMode)}</span>
         </button>
-        <button type="button" class="mode-btn" id="btnModeSlides" onclick="setViewerMode('slides')" title="Mode Diapositives (1 page par écran)">
+        <button type="button" class="mode-btn ${isSlides ? 'active' : ''}" id="btnModeSlides" onclick="setViewerMode('slides')" title="${esc(t.slidesModeTitle)}">
           <svg class="i" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
-          <span>Diapositives</span>
+          <span id="btnModeSlidesText">${esc(t.slidesMode)}</span>
         </button>
       </div>
 
-      <span class="pill" id="topCount" aria-label="Page courante">Page 1 / ${total}</span>
 
-      <button type="button" class="icon-btn fs-toggle" title="Plein écran (F)" aria-label="Plein écran" onclick="toggleFullscreen()">
+      <!-- PWA Install Button (shown if installable) -->
+      <button type="button" class="lang-btn pwa-btn" id="btnInstallPwa" onclick="triggerPwaInstall()" title="${esc(t.installPwa)}" aria-label="${esc(t.installPwa)}" style="display:none">
+        <span style="font-size:13px">📥</span>
+        <span id="btnInstallPwaText">${esc(t.installPwa)}</span>
+      </button>
+
+      <span class="pill" id="topCount" aria-label="${esc(t.pagePillAria)}">${esc(t.pageCounter(1, total))}</span>
+
+      <button type="button" class="icon-btn fs-toggle" title="${esc(t.fullscreen)}" aria-label="${esc(t.fullscreenAria)}" onclick="toggleFullscreen()">
         <svg class="i i-max" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
         <svg class="i i-min" viewBox="0 0 24 24"><path d="M8 3v3a2 2 0 01-2 2H3m18 0h-3a2 2 0 01-2-2V3m0 18v-3a2 2 0 012-2h3M3 16h3a2 2 0 012 2v3"/></svg>
+      </button>
+
+      <!-- Kiosk Mode Exit Button (✕ Quitter) shown only in kiosk mode -->
+      <button type="button" class="kiosk-exit-btn" id="btnKioskExit" title="Quitter le mode plein écran" aria-label="Quitter le mode plein écran" onclick="exitKioskMode()" style="display:none">
+        <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
+        <span>Quitter</span>
       </button>
     </div>
   </header>
 
   <!-- ═══════════════════════════════════════════════════ STAGE -->
   <main class="stage" id="stage">
-    <button type="button" class="nav prev" id="prev" title="Page précédente (←)" aria-label="Page précédente" onclick="goPrev()">
+    <button type="button" class="nav prev" id="prev" title="${esc(t.prevPage)}" aria-label="${esc(t.prevPage)}" onclick="goPrev()">
       <svg class="i" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
     <div id="viewer-wrap">
       <div id="flipbook-container"></div>
     </div>
-    <button type="button" class="nav next" id="next" title="Page suivante (→)" aria-label="Page suivante" onclick="goNext()">
+    <button type="button" class="nav next" id="next" title="${esc(t.nextPage)}" aria-label="${esc(t.nextPage)}" onclick="goNext()">
       <svg class="i" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
     </button>
   </main>
 
   <!-- ═══════════════════════════════════════════════════ TABLE OF CONTENTS -->
-  <section class="toc" id="toc" aria-label="Table des matières">
+  <section class="toc" id="toc" aria-label="${esc(t.tocTitle)}">
     <div class="toc-head">
-      <b>Table des matières</b>
-      <span id="tocInfo">${total} pages</span>
+      <b id="tocHeadTitle">${esc(t.tocTitle)}</b>
+      <span id="tocInfo">${esc(t.tocPagesInfo(total))}</span>
     </div>
     <div class="strip" id="strip"></div>
   </section>
@@ -75,93 +92,93 @@ function shellHtml(title, subtitle, total) {
   <div class="dock" id="dock">
     <!-- Floating Pen & Eraser Palette -->
     <div class="pen-panel" id="penPanel" hidden data-tool="pen">
-      <div class="colors" id="colors" role="group" aria-label="Couleur du crayon"></div>
-      <div class="sizes" id="sizes" role="group" aria-label="Épaisseur du trait">
-        <button type="button" class="sz" data-size="2" aria-label="Trait fin" onclick="setDrawingSize(2, this)"><i style="width:5px;height:5px"></i></button>
-        <button type="button" class="sz" data-size="5" aria-label="Trait moyen" onclick="setDrawingSize(5, this)"><i style="width:10px;height:10px"></i></button>
-        <button type="button" class="sz" data-size="12" aria-label="Trait épais" onclick="setDrawingSize(12, this)"><i style="width:17px;height:17px"></i></button>
+      <div class="colors" id="colors" role="group" aria-label="${esc(t.penColorGroup)}"></div>
+      <div class="sizes" id="sizes" role="group" aria-label="${esc(t.penSizeGroup)}">
+        <button type="button" class="sz" data-size="2" aria-label="${esc(t.fineStroke)}" onclick="setDrawingSize(2, this)"><i style="width:5px;height:5px"></i></button>
+        <button type="button" class="sz" data-size="5" aria-label="${esc(t.mediumStroke)}" onclick="setDrawingSize(5, this)"><i style="width:10px;height:10px"></i></button>
+        <button type="button" class="sz" data-size="12" aria-label="${esc(t.thickStroke)}" onclick="setDrawingSize(12, this)"><i style="width:17px;height:17px"></i></button>
       </div>
       <span class="sep"></span>
-      <button type="button" class="mini" id="undo" title="Annuler le dernier trait" aria-label="Annuler le dernier trait" onclick="undoLastStroke()">
+      <button type="button" class="mini" id="undo" title="${esc(t.undoStroke)}" aria-label="${esc(t.undoStroke)}" onclick="undoLastStroke()">
         <svg class="i" viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 00-15-6.7L3 13"/></svg>
       </button>
-      <button type="button" class="mini" id="clearPages" title="Effacer les annotations de la page" aria-label="Effacer les annotations" onclick="clearActivePageDrawing()">
+      <button type="button" class="mini" id="clearPages" title="${esc(t.clearAnnotations)}" aria-label="${esc(t.clearAnnotations)}" onclick="clearActivePageDrawing()">
         <svg class="i" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
       </button>
     </div>
 
     <!-- Floating Paint Bucket Palette -->
     <div class="bucket-panel" id="bucketPanel" hidden data-tool="bucket">
-      <div class="colors" id="bucketColors" role="group" aria-label="Palette du pot de peinture"></div>
+      <div class="colors" id="bucketColors" role="group" aria-label="${esc(t.bucketPalette)}"></div>
       <span class="sep"></span>
-      <button type="button" class="mini" id="undoBucketFill" title="Annuler le dernier coloriage" aria-label="Annuler le coloriage" onclick="undoLastFill()">
+      <button type="button" class="mini" id="undoBucketFill" title="${esc(t.undoFill)}" aria-label="${esc(t.undoFill)}" onclick="undoLastFill()">
         <svg class="i" viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 00-15-6.7L3 13"/></svg>
       </button>
-      <button type="button" class="mini" id="clearFills" title="Effacer les couleurs coloriées" aria-label="Effacer les couleurs" onclick="clearActivePageFill()">
+      <button type="button" class="mini" id="clearFills" title="${esc(t.clearFills)}" aria-label="${esc(t.clearFills)}" onclick="clearActivePageFill()">
         <svg class="i" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
       </button>
-      <button type="button" class="mini-btn-validate" id="btnValidateColoring" onclick="validatePageDrawings()" title="Corriger l'exercice de coloriage">
+      <button type="button" class="mini-btn-validate" id="btnValidateColoring" onclick="validatePageDrawings()" title="${esc(t.validateColoring)}">
         <svg class="i" viewBox="0 0 24 24" style="width:14px;height:14px;"><path d="M20 6L9 17l-5-5"/></svg>
-        <span>Corriger</span>
+        <span id="btnValidateColoringText">${esc(t.validateBtn)}</span>
       </button>
     </div>
 
     <!-- Floating Arrow Tool Panel -->
     <div class="arrow-panel" id="arrowPanel" hidden data-tool="arrow">
-      <button type="button" class="mini-btn-validate" id="btnValidateArrows" onclick="validatePageArrows()" title="Corriger toutes les flèches de la page">
+      <button type="button" class="mini-btn-validate" id="btnValidateArrows" onclick="validatePageArrows()" title="${esc(t.validateArrows)}">
         <svg class="i" viewBox="0 0 24 24" style="width:14px;height:14px;"><path d="M20 6L9 17l-5-5"/></svg>
-        <span>Corriger</span>
+        <span id="btnValidateArrowsText">${esc(t.validateBtn)}</span>
       </button>
       <span class="sep"></span>
-      <button type="button" class="mini" id="undoArrow" title="Annuler la dernière flèche" aria-label="Annuler la flèche" onclick="undoLastArrow()">
+      <button type="button" class="mini" id="undoArrow" title="${esc(t.undoArrow)}" aria-label="${esc(t.undoArrow)}" onclick="undoLastArrow()">
         <svg class="i" viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 00-15-6.7L3 13"/></svg>
       </button>
-      <button type="button" class="mini" id="clearArrows" title="Effacer toutes les flèches" aria-label="Effacer toutes les flèches" onclick="clearPageArrows()">
+      <button type="button" class="mini" id="clearArrows" title="${esc(t.clearArrows)}" aria-label="${esc(t.clearArrows)}" onclick="clearPageArrows()">
         <svg class="i" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
       </button>
     </div>
 
     <!-- Main Navigation & Tools Dock -->
-    <nav class="tools" aria-label="Outils du flipbook">
-      <button type="button" class="tb" id="tPrev" title="Page précédente (←)" aria-label="Page précédente" onclick="goPrev()">
+    <nav class="tools" aria-label="${esc(t.dockAria)}">
+      <button type="button" class="tb" id="tPrev" title="${esc(t.prevPage)}" aria-label="${esc(t.prevPage)}" onclick="goPrev()">
         <svg class="i" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
-      <span class="count" id="toolCount" aria-live="polite" onclick="promptPage()" title="Cliquer pour aller à une page">1 / ${total}</span>
-      <button type="button" class="tb" id="tNext" title="Page suivante (→)" aria-label="Page suivante" onclick="goNext()">
+      <span class="count" id="toolCount" aria-live="polite" onclick="promptPage()" title="${esc(t.pageJumpTitle)}">1 / ${total}</span>
+      <button type="button" class="tb" id="tNext" title="${esc(t.nextPage)}" aria-label="${esc(t.nextPage)}" onclick="goNext()">
         <svg class="i" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
       </button>
       <span class="sep"></span>
-      <button type="button" class="tb" id="penBtn" aria-pressed="false" title="Crayon (P)" aria-label="Crayon pour dessiner ou annoter" onclick="toggleViewerTool('pen')">
+      <button type="button" class="tb" id="penBtn" aria-pressed="false" title="${esc(t.pen)}" aria-label="${esc(t.penAria)}" onclick="toggleViewerTool('pen')">
         <svg class="i" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>
       </button>
-      <button type="button" class="tb" id="calligraphyBtn" aria-pressed="false" title="Plume calligraphique (K)" aria-label="Plume calligraphique pour écriture fluide et artistique" onclick="toggleViewerTool('calligraphy')">
+      <button type="button" class="tb" id="calligraphyBtn" aria-pressed="false" title="${esc(t.calligraphy)}" aria-label="${esc(t.calligraphyAria)}" onclick="toggleViewerTool('calligraphy')">
         <svg class="i" viewBox="0 0 24 24"><path d="m12 19 7-7 3 3-7 7-3-3z"/><path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18"/><path d="m2 2 7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
       </button>
-      <button type="button" class="tb" id="eraserBtn" aria-pressed="false" title="Gomme (E)" aria-label="Gomme pour effacer" onclick="toggleViewerTool('eraser')">
+      <button type="button" class="tb" id="eraserBtn" aria-pressed="false" title="${esc(t.eraser)}" aria-label="${esc(t.eraserAria)}" onclick="toggleViewerTool('eraser')">
         <svg class="i" viewBox="0 0 24 24"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
       </button>
-      <button type="button" class="tb" id="bucketBtn" aria-pressed="false" title="Pot de peinture : colorier les zones" aria-label="Pot de peinture" onclick="toggleViewerTool('bucket')">
+      <button type="button" class="tb" id="bucketBtn" aria-pressed="false" title="${esc(t.bucket)}" aria-label="${esc(t.bucketAria)}" onclick="toggleViewerTool('bucket')">
         <svg class="i" viewBox="0 0 24 24"><path d="m19 11-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2c.8.8 2 .8 2.8 0L19 11Z"/><path d="m5 2 5 5"/><path d="M2 13h15"/><path d="M22 20a2 2 0 1 1-4 0c0-1.6 1.7-2.4 2-4 .3 1.6 2 2.4 2 4Z"/></svg>
       </button>
-      <button type="button" class="tb" id="arrowToolBtn" aria-pressed="false" title="Tracer des flèches" aria-label="Tracer des flèches" onclick="toggleViewerTool('arrow')">
+      <button type="button" class="tb" id="arrowToolBtn" aria-pressed="false" title="${esc(t.arrowTool)}" aria-label="${esc(t.arrowToolAria)}" onclick="toggleViewerTool('arrow')">
         <svg class="i" viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
       </button>
-      <button type="button" class="tb" id="circleToolBtn" aria-pressed="false" title="Entourer la zone (C)" aria-label="Entourer la zone" onclick="toggleViewerTool('circle')">
+      <button type="button" class="tb" id="circleToolBtn" aria-pressed="false" title="${esc(t.circleTool)}" aria-label="${esc(t.circleToolAria)}" onclick="toggleViewerTool('circle')">
         <svg class="i" viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="8" ry="5.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
       </button>
-      <button type="button" class="tb" id="loupeBtn" aria-pressed="false" title="Loupe (Z)" aria-label="Loupe grossissante" onclick="toggleViewerTool('loupe')">
+      <button type="button" class="tb" id="loupeBtn" aria-pressed="false" title="${esc(t.loupe)}" aria-label="${esc(t.loupeAria)}" onclick="toggleViewerTool('loupe')">
         <svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
       </button>
       <span class="sep"></span>
-      <button type="button" class="tb" id="tocBtn" aria-expanded="false" aria-controls="toc" title="Table des matières (T)" aria-label="Table des matières" onclick="toggleToc()">
+      <button type="button" class="tb" id="tocBtn" aria-expanded="false" aria-controls="toc" title="${esc(t.tocButtonTitle)}" aria-label="${esc(t.tocTitle)}" onclick="toggleToc()">
         <svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
       </button>
-      <button type="button" class="tb" id="soundBtn" title="Couper le son de page (M)" aria-label="Activer/désactiver le son" onclick="toggleSound()">
+      <button type="button" class="tb" id="soundBtn" title="${esc(t.soundToggleOn)}" aria-label="${esc(t.soundToggleAria)}" onclick="toggleSound()">
         <svg class="i i-sound-on" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
         <svg class="i i-sound-off" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/></svg>
       </button>
       <span class="sep sep-fs"></span>
-      <button type="button" class="tb tb-fs fs-toggle" title="Plein écran (F)" aria-label="Plein écran" onclick="toggleFullscreen()">
+      <button type="button" class="tb tb-fs fs-toggle" title="${esc(t.fullscreen)}" aria-label="${esc(t.fullscreenAria)}" onclick="toggleFullscreen()">
         <svg class="i i-max" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
         <svg class="i i-min" viewBox="0 0 24 24"><path d="M8 3v3a2 2 0 01-2 2H3m18 0h-3a2 2 0 01-2-2V3m0 18v-3a2 2 0 012-2h3M3 16h3a2 2 0 012 2v3"/></svg>
       </button>
@@ -175,23 +192,23 @@ function shellHtml(title, subtitle, total) {
   <div id="circular-loupe-lens" class="circular-loupe-lens" style="display:none;"></div>
 
   <!-- ═══════════════════════════════════════════════════ ZOOM HD MODAL -->
-  <div id="image-modal" role="dialog" aria-modal="true" aria-label="Agrandissement HD" onclick="closeModal()">
+  <div id="image-modal" role="dialog" aria-modal="true" aria-label="${esc(t.zoomModalAria)}" onclick="closeModal()">
     <div class="modal-dialog" onclick="event.stopPropagation()">
       <div class="modal-header">
-        <h3 id="zoom-modal-title"><span style="color:var(--brand);margin-right:6px">🔍</span>Zoom Haute Définition</h3>
+        <h3 id="zoom-modal-title"><span style="color:var(--brand);margin-right:6px">🔍</span>${esc(t.zoomModalTitle)}</h3>
         <div class="modal-header-actions">
-          <div class="modal-zoom-controls" role="group" aria-label="Contrôles de zoom">
-            <button type="button" class="modal-zoom-btn" id="btn-zoom-out" onclick="adjustZoom(-0.25)" title="Zoom arrière (-)">−</button>
+          <div class="modal-zoom-controls" role="group" aria-label="${esc(t.zoomControlsAria)}">
+            <button type="button" class="modal-zoom-btn" id="btn-zoom-out" onclick="adjustZoom(-0.25)" title="${esc(t.zoomOut)}">−</button>
             <span class="modal-zoom-level" id="zoom-level">100%</span>
-            <button type="button" class="modal-zoom-btn" id="btn-zoom-in" onclick="adjustZoom(0.25)" title="Zoom avant (+)">+</button>
-            <button type="button" class="modal-zoom-btn" id="btn-zoom-reset" onclick="resetZoom()" title="Réinitialiser (0)">1:1</button>
+            <button type="button" class="modal-zoom-btn" id="btn-zoom-in" onclick="adjustZoom(0.25)" title="${esc(t.zoomIn)}">+</button>
+            <button type="button" class="modal-zoom-btn" id="btn-zoom-reset" onclick="resetZoom()" title="${esc(t.zoomReset)}">1:1</button>
           </div>
-          <button type="button" class="modal-close-btn" onclick="closeModal()" title="Fermer (Échap)">✕</button>
+          <button type="button" class="modal-close-btn" onclick="closeModal()" title="${esc(t.closeModal)}">✕</button>
         </div>
       </div>
       <div class="modal-body" id="modal-img-wrap">
         <div id="modal-viewport" class="modal-viewport">
-          <img id="modal-img" src="" alt="Zoom HD" draggable="false" />
+          <img id="modal-img" src="" alt="${esc(t.zoomHD)}" draggable="false" />
           <canvas id="modal-annot-canvas" class="modal-annot-canvas"></canvas>
           <svg id="modal-arrow-svg" class="modal-arrow-svg">
             <defs>
@@ -224,13 +241,13 @@ function shellHtml(title, subtitle, total) {
   </div>
 
   <!-- ═══════════════════════════════════════════════════ VIDEO MODAL -->
-  <div id="video-modal" role="dialog" aria-modal="true" aria-label="Vidéo YouTube" onclick="closeVideoModal()">
+  <div id="video-modal" role="dialog" aria-modal="true" aria-label="${esc(t.videoModalAria)}" onclick="closeVideoModal()">
     <div class="modal-dialog" onclick="event.stopPropagation()">
       <div class="modal-header">
-        <h3 id="video-modal-title"><span style="color:#ef4444;margin-right:6px">▶</span>Vidéo YouTube</h3>
+        <h3 id="video-modal-title"><span style="color:#ef4444;margin-right:6px">▶</span>${esc(t.videoModalTitle)}</h3>
         <div style="display:flex; align-items:center; gap:8px;">
-          <a id="video-modal-yt-btn" href="#" target="_blank" rel="noopener noreferrer" style="font-size:12px; color:var(--brand); text-decoration:none; display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:8px; background:color-mix(in srgb,var(--brand) 15%,transparent); border:1px solid var(--line);" title="Ouvrir sur YouTube">↗ YouTube</a>
-          <button type="button" class="modal-close-btn" onclick="closeVideoModal()" title="Fermer (Échap)">✕</button>
+          <a id="video-modal-yt-btn" href="#" target="_blank" rel="noopener noreferrer" style="font-size:12px; color:var(--brand); text-decoration:none; display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:8px; background:color-mix(in srgb,var(--brand) 15%,transparent); border:1px solid var(--line);" title="${esc(t.openOnYouTube)}">${esc(t.openOnYouTube)}</a>
+          <button type="button" class="modal-close-btn" onclick="closeVideoModal()" title="${esc(t.closeModal)}">✕</button>
         </div>
       </div>
       <div class="modal-body">
@@ -253,8 +270,25 @@ export function startViewer(project, options = {}) {
     const title = project.title || 'Flipbook';
     const subtitle = project.subtitle || '';
     const total = (project.pages || []).length;
+    const startMode = (project.startMode === 'slides' || project.format === 'slides') ? 'slides' : 'flipbook';
+
+    let currentLang = (() => {
+        try {
+            localStorage.removeItem('flipbook_lang');
+            if (localStorage.getItem('locale') === 'ar') {
+                localStorage.setItem('locale', 'fr');
+            }
+        } catch (e) { }
+        if (project.lang === 'ar' || project.locale === 'ar') return 'ar';
+        return 'fr';
+    })();
+
+    const getT = () => TRANSLATIONS[currentLang] || TRANSLATIONS.fr;
+
     document.title = title + ' — Flipbook Interactif';
-    (options.root || document.body).insertAdjacentHTML('afterbegin', shellHtml(title, subtitle, total));
+    document.documentElement.lang = currentLang;
+    document.documentElement.dir = (currentLang === 'ar') ? 'rtl' : 'ltr';
+    (options.root || document.body).insertAdjacentHTML('afterbegin', shellHtml(title, subtitle, total, startMode, currentLang));
     const BOOK = project;
     const TOTAL = total;
 
@@ -262,7 +296,7 @@ export function startViewer(project, options = {}) {
     let soundEnabled = true;
     let pageFlip = null;
     let thumbDrawerOpen = false;
-    let currentMode = (project.startMode === 'slides') ? 'slides' : 'flipbook';
+    let currentMode = startMode;
 
     // Audio & Speech State
     let currentAudio = null;
@@ -390,9 +424,9 @@ export function startViewer(project, options = {}) {
                 if (isAllPerfect) {
                     playCelebrationChime();
                     playLottieSuccess();
-                    toast('Bravo ! Toutes les cases cochées sont correctes ! ⭐');
+                    toast(getT().toastCheckboxAllCorrect);
                 } else {
-                    toast(`Correction : ${correctChecked} bonne(s) réponse(s), ${wrongChecked + missingChecked} erreur(s).`);
+                    toast(getT().toastCheckboxCorrection(correctChecked, wrongChecked + missingChecked));
                 }
             }
 
@@ -535,15 +569,16 @@ export function startViewer(project, options = {}) {
                 playLottieSuccess();
             }
             const pageArg = (targetPage !== undefined && targetPage !== null && targetPage !== '') ? String(targetPage) : '';
+            const t = getT();
             scorePanel.innerHTML =
-                '<h4>📊 Score de la page</h4>' +
-                '<span class="score-num">' + correct + ' / ' + total + star + '</span>' +
-                '<span class="score-sub">' + pct + '% de bonnes réponses</span>' +
-                '<div class="score-bar-wrap"><div class="score-bar" style="width:' + pct + '%"></div></div>' +
+                `<h4>${t.scoreTitle}</h4>` +
+                `<span class="score-num">${correct} / ${total}${star}</span>` +
+                `<span class="score-sub">${t.scorePct(pct)}</span>` +
+                `<div class="score-bar-wrap"><div class="score-bar" style="width:${pct}%"></div></div>` +
                 '<div class="score-btns">' +
-                `<button class="score-btn validate-btn" onclick="FBEngine.validateGroup('', '${pageArg}')">Corriger</button>` +
-                `<button class="score-btn" onclick="FBEngine.revealAnswers('', '${pageArg}')">Réponses</button>` +
-                `<button class="score-btn" onclick="FBEngine.resetGroup('', '${pageArg}')">Refaire</button>` +
+                `<button class="score-btn validate-btn" onclick="FBEngine.validateGroup('', '${pageArg}')">${t.validateBtn}</button>` +
+                `<button class="score-btn" onclick="FBEngine.revealAnswers('', '${pageArg}')">${t.revealAnswers}</button>` +
+                `<button class="score-btn" onclick="FBEngine.resetGroup('', '${pageArg}')">${t.retry}</button>` +
                 '</div>';
         }
 
@@ -872,7 +907,7 @@ export function startViewer(project, options = {}) {
                     btn.style.height = inter.size + 'px';
                     btn.style.fontSize = Math.max(12, inter.size * 0.45) + 'px';
                 }
-                btn.setAttribute('aria-label', inter.title || "Écouter l'audio");
+                btn.setAttribute('aria-label', inter.title || getT().listenAudio);
                 btn.title = inter.title || '';
                 btn.innerHTML = `${AUDIO_ICON_SVG}`;
                 btn.addEventListener('click', (e) => {
@@ -891,8 +926,8 @@ export function startViewer(project, options = {}) {
                     btn.style.height = inter.size + 'px';
                     btn.style.fontSize = Math.max(12, inter.size * 0.45) + 'px';
                 }
-                btn.setAttribute('aria-label', "Écouter le texte");
-                btn.title = 'Écouter le texte';
+                btn.setAttribute('aria-label', getT().listenTTS);
+                btn.title = getT().listenTTS;
                 btn.innerHTML = `${AUDIO_ICON_SVG}`;
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -910,8 +945,8 @@ export function startViewer(project, options = {}) {
                     btn.style.height = inter.size + 'px';
                     btn.style.fontSize = Math.max(12, inter.size * 0.45) + 'px';
                 }
-                btn.setAttribute('aria-label', inter.title || "Regarder la vidéo");
-                btn.title = inter.title || 'Vidéo YouTube';
+                btn.setAttribute('aria-label', inter.title || getT().watchVideo);
+                btn.title = inter.title || getT().videoTitle;
                 btn.innerHTML = '▶';
                 if (inter.title) {
                     const tip = document.createElement('span');
@@ -934,9 +969,9 @@ export function startViewer(project, options = {}) {
                 zone.style.width = widthVal;
                 zone.style.height = heightVal;
                 zone.setAttribute('role', 'button');
-                zone.setAttribute('aria-label', inter.title || "Agrandir l'image");
+                zone.setAttribute('aria-label', inter.title || getT().zoomHDAria);
                 zone.tabIndex = 0;
-                zone.title = `🔍 ${escapeHtml(inter.title || 'Zoom HD')} (cliquer pour agrandir)`;
+                zone.title = `🔍 ${escapeHtml(inter.title || getT().zoomHD)} (cliquer pour agrandir)`;
                 zone.innerHTML = `<span class="zoom-badge">${ZOOM_LOUPE_SVG}</span>`;
                 const openZ = (e) => {
                     e.stopPropagation();
@@ -946,7 +981,7 @@ export function startViewer(project, options = {}) {
                     const zH = parseFloat(String(inter.height || 30).replace('%', '')) || 30;
                     openModal(
                         asset(inter.hiresSrc || inter.imageSrc || page.imagePath),
-                        inter.title || 'Zoom HD',
+                        inter.title || getT().zoomHD,
                         pNum,
                         { x: zX, y: zY, width: zW, height: zH },
                         inter
@@ -984,7 +1019,7 @@ export function startViewer(project, options = {}) {
                     const hBtn = document.createElement('button');
                     hBtn.className = 'fb-hint-btn';
                     hBtn.textContent = '?';
-                    hBtn.title = 'Indice';
+                    hBtn.title = getT().hint;
                     hBtn.addEventListener('click', (e) => {
                         e.stopPropagation();
                         let tip = wrap.querySelector('.fb-hint-tooltip');
@@ -1018,7 +1053,12 @@ export function startViewer(project, options = {}) {
                 mask.style.left = leftVal; mask.style.top = topVal;
                 mask.style.width = wVal; mask.style.height = hVal;
                 mask.style.background = inter.coverColor || '#f59e0b';
-                mask.textContent = inter.coverLabel || '💡 Cliquer pour révéler';
+                if (inter.coverLabel) {
+                    mask.textContent = inter.coverLabel;
+                    mask.dataset.customCover = '1';
+                } else {
+                    mask.textContent = getT().revealClick;
+                }
                 mask.addEventListener('click', (e) => {
                     e.stopPropagation();
                     mask.classList.add('revealed');
@@ -1128,7 +1168,12 @@ export function startViewer(project, options = {}) {
                 btn.style.border = 'none';
                 btn.style.cursor = 'pointer';
                 btn.style.boxShadow = '0 4px 12px rgba(249, 115, 22, 0.3)';
-                btn.textContent = inter.label || 'Corriger';
+                if (inter.label) {
+                    btn.textContent = inter.label;
+                    btn.dataset.customLabel = '1';
+                } else {
+                    btn.textContent = getT().validateBtn;
+                }
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     FBEngine.validateGroup(inter.groupId || '', pNum);
@@ -1582,10 +1627,10 @@ export function startViewer(project, options = {}) {
         syncModeButtons();
         if (currentMode === 'slides') {
             initSlidesView();
-            toast('Mode Diapositives activé (1 page par écran)');
+            toast(getT().toastSlidesMode);
         } else {
             initFlipbook();
-            toast('Mode Flipbook activé (Livre 3D interactif)');
+            toast(getT().toastFlipbookMode);
         }
         updateUI();
     };
@@ -1670,7 +1715,7 @@ export function startViewer(project, options = {}) {
         }
     };
     window.promptPage = () => {
-        const val = prompt(`Go to page (1 - ${TOTAL}) / Aller à la page (1 - ${TOTAL}) :`, currentPage);
+        const val = prompt(getT().pageJumpPrompt(TOTAL), currentPage);
         if (val === null) return;
         const n = parseInt(val, 10);
         if (!isNaN(n) && n >= 1 && n <= TOTAL) window.goToPage(n);
@@ -1751,7 +1796,7 @@ export function startViewer(project, options = {}) {
         // Strictly respect constraint: Never color the rectangle if mask is missing
         if (!hasMask || !maskDataUrl) {
             console.warn(`[Dessin ${drawId}] Masque de contour manquant. Le remplissage rectangulaire est bloqué.`);
-            toast('Masque de contour manquant pour ce dessin.');
+            toast(getT().toastContourMaskMissing);
             return;
         }
 
@@ -1952,7 +1997,7 @@ export function startViewer(project, options = {}) {
                 }
             }
         });
-        toast(undone ? 'Dernier coloriage annulé.' : 'Rien à annuler.');
+        toast(undone ? getT().toastFillUndone : getT().toastNothingToUndo);
     };
 
     function clearDrawingFeedback(pNum) {
@@ -1961,17 +2006,32 @@ export function startViewer(project, options = {}) {
         });
     }
 
+    const BUCKET_KEY_MAP = {
+        '#ef4444': 'red',
+        '#f97316': 'orange',
+        '#facc15': 'yellow',
+        '#22c55e': 'green',
+        '#06b6d4': 'cyan',
+        '#3b82f6': 'blue',
+        '#8b5cf6': 'purple',
+        '#ec4899': 'pink',
+        '#78350f': 'brown',
+        '#ffffff': 'white',
+    };
+
     function buildBucketColors() {
         const bucketEl = document.getElementById('bucketColors');
         if (!bucketEl) return;
         bucketEl.innerHTML = '';
-        BUCKET_COLORS.forEach(([rgba, solidHex, name]) => {
+        BUCKET_COLORS.forEach(([rgba, solidHex, defaultName]) => {
             const b = document.createElement('button');
             b.type = 'button';
             b.className = 'sw';
             b.style.background = solidHex;
-            b.title = name;
-            b.setAttribute('aria-label', name);
+            const key = BUCKET_KEY_MAP[solidHex.toLowerCase()];
+            const localizedName = (key && getT().colors[key]) ? getT().colors[key] : defaultName;
+            b.title = localizedName;
+            b.setAttribute('aria-label', localizedName);
             b.setAttribute('aria-pressed', rgba === currentBucketColor ? 'true' : 'false');
             if (rgba === currentBucketColor) b.classList.add('sw-active');
             b.addEventListener('click', () => {
@@ -2040,7 +2100,7 @@ export function startViewer(project, options = {}) {
                 reg.classList.remove('is-painted');
             });
         });
-        toast('Coloriages de la page effacés.');
+        toast(getT().toastFillsCleared);
     };
 
     window.validatePageDrawings = function (targetPageNum) {
@@ -2090,9 +2150,9 @@ export function startViewer(project, options = {}) {
         if (totalExercises > 0) {
             if (totalCorrect > 0 && totalIncorrect === 0 && totalMissing === 0) {
                 FBEngine.playCelebrationChime();
-                toast('Bravo ! Tous les bons dessins sont coloriés ! ⭐');
+                toast(getT().toastColorAllCorrect);
             } else {
-                toast(`Correction coloriage : ${totalCorrect} correct(s), ${totalIncorrect} incorrect(s), ${totalMissing} oublié(s).`);
+                toast(getT().toastColorCorrection(totalCorrect, totalIncorrect, totalMissing));
             }
         }
     };
@@ -2237,7 +2297,7 @@ export function startViewer(project, options = {}) {
                     text.setAttribute('font-size', '9');
                     text.setAttribute('font-weight', 'bold');
                     text.setAttribute('text-anchor', 'middle');
-                    text.textContent = 'Manquante';
+                    text.textContent = getT().arrowMissing || 'Manquante';
                     rendersG.appendChild(text);
                 }
             });
@@ -2269,7 +2329,7 @@ export function startViewer(project, options = {}) {
                 renderPageArrows(pNum);
             }
         });
-        toast('Dernière flèche annulée.');
+        toast(getT().toastArrowUndone);
     };
 
     window.clearPageArrows = function () {
@@ -2279,7 +2339,7 @@ export function startViewer(project, options = {}) {
             delete pageArrowEvaluations[pNum];
             renderPageArrows(pNum);
         });
-        toast('Toutes les flèches effacées.');
+        toast(getT().toastArrowsCleared);
     };
 
     window.validatePageArrows = function () {
@@ -2380,11 +2440,11 @@ export function startViewer(project, options = {}) {
         if (totalExp > 0) {
             if (totalCorrect === totalExp && totalIncorrect === 0) {
                 FBEngine.playCelebrationChime();
-                toast(`Toutes les flèches sont correctes ! (${totalCorrect}/${totalExp}) ⭐`);
+                toast(getT().toastArrowAllCorrect(totalCorrect, totalExp));
             } else {
-                const parts = [`${totalCorrect} correcte(s)`, `${totalIncorrect} incorrecte(s)`];
-                if (totalMissing > 0) parts.push(`${totalMissing} manquante(s)`);
-                toast(`Correction flèches : ${parts.join(', ')}.`);
+                const parts = [getT().toastArrowCorrectItem(totalCorrect), getT().toastArrowIncorrectItem(totalIncorrect)];
+                if (totalMissing > 0) parts.push(getT().toastArrowMissingItem(totalMissing));
+                toast(getT().toastArrowCorrection(parts));
             }
         }
     };
@@ -2414,11 +2474,11 @@ export function startViewer(project, options = {}) {
                 cZone.classList.add('choice-correct');
                 cZone.appendChild(makeChoiceBadge('✓', 'correct'));
                 FBEngine.playCelebrationChime();
-                toast('Bonne réponse ! ⭐');
+                toast(getT().toastCorrectAnswer);
             } else {
                 cZone.classList.add('choice-incorrect');
                 cZone.appendChild(makeChoiceBadge('✕', 'incorrect'));
-                toast('Réponse incorrecte. Essayez encore !');
+                toast(getT().toastIncorrectAnswer);
             }
         } else {
             // Multiple choice: clear previous evaluation results when editing resumes
@@ -2528,10 +2588,10 @@ export function startViewer(project, options = {}) {
                     FBEngine.playCelebrationChime();
                 }
             } catch (err) { }
-            toast('Bonne réponse ! ⭐');
+            toast(getT().toastCorrectAnswer);
         } else {
             cZone.classList.add('circle-incorrect', 'circle-anim-shake');
-            toast('Réponse incorrecte. Essayez encore !');
+            toast(getT().toastIncorrectAnswer);
         }
     }
 
@@ -2647,7 +2707,7 @@ export function startViewer(project, options = {}) {
                             FBEngine.playCelebrationChime();
                         }
                     } catch (err) {}
-                    toast('Élément bien placé ! ⭐');
+                    toast(getT().toastDragCorrect);
 
                     setTimeout(() => {
                         dragItem.style.transition = '';
@@ -2657,7 +2717,7 @@ export function startViewer(project, options = {}) {
                 } else {
                     // Wrong drop target!
                     dragItem.classList.add('drag-error-shake');
-                    toast('Mauvais emplacement. Essayez encore !');
+                    toast(getT().toastDragIncorrect);
                 }
             } else {
                 // Dropped outside any target
@@ -2730,7 +2790,7 @@ export function startViewer(project, options = {}) {
                 mCtx.clearRect(0, 0, mCanvas.width, mCanvas.height);
             }
         }
-        toast('Annotations effacées.');
+        toast(getT().toastAnnotationsCleared);
     };
 
     function applyViewerToolState() {
@@ -2759,7 +2819,7 @@ export function startViewer(project, options = {}) {
             if (b1) { b1.setAttribute('aria-pressed', 'true'); b1.classList.add('active'); }
             if (b2) b2.classList.add('active');
             if (penPanel) { penPanel.dataset.tool = 'pen'; }
-            toast('Crayon actif : dessinez ou écrivez sur les pages.');
+            toast(getT().toastPenActive);
             setupAllAnnotCanvases();
         } else if (activeViewerTool === 'calligraphy') {
             const b1 = document.getElementById('calligraphyBtn');
@@ -2767,7 +2827,7 @@ export function startViewer(project, options = {}) {
             if (b1) { b1.setAttribute('aria-pressed', 'true'); b1.classList.add('active'); }
             if (b2) b2.classList.add('active');
             if (penPanel) { penPanel.dataset.tool = 'calligraphy'; }
-            toast('Plume calligraphique active : écriture fluide et artistique.');
+            toast(getT().toastCalligraphyActive);
             setupAllAnnotCanvases();
         } else if (activeViewerTool === 'eraser') {
             const b1 = document.getElementById('eraserBtn');
@@ -2775,26 +2835,26 @@ export function startViewer(project, options = {}) {
             if (b1) { b1.setAttribute('aria-pressed', 'true'); b1.classList.add('active'); }
             if (b2) b2.classList.add('active');
             if (penPanel) { penPanel.dataset.tool = 'eraser'; }
-            toast('Gomme active : passez sur vos annotations pour les effacer.');
+            toast(getT().toastEraserActive);
             setupAllAnnotCanvases();
         } else if (activeViewerTool === 'bucket') {
             const b1 = document.getElementById('bucketBtn');
             if (b1) { b1.setAttribute('aria-pressed', 'true'); b1.classList.add('active'); }
-            toast('Pot de peinture actif : choisissez une couleur et cliquez sur une zone à colorier.');
+            toast(getT().toastBucketActive);
         } else if (activeViewerTool === 'arrow') {
             const b1 = document.getElementById('arrowToolBtn');
             if (b1) { b1.setAttribute('aria-pressed', 'true'); b1.classList.add('active'); }
-            toast('Outil Flèche actif : glissez pour tracer une flèche de départ à arrivée.');
+            toast(getT().toastArrowActive);
         } else if (activeViewerTool === 'circle') {
             const b1 = document.getElementById('circleToolBtn');
             if (b1) { b1.setAttribute('aria-pressed', 'true'); b1.classList.add('active'); }
-            toast('Entourer la zone actif : cliquez sur une option pour l\'entourer.');
+            toast(getT().toastCircleActive);
         } else if (activeViewerTool === 'loupe') {
             const b1 = document.getElementById('loupeBtn');
             const b2 = document.getElementById('btn-loupe');
             if (b1) { b1.setAttribute('aria-pressed', 'true'); b1.classList.add('active'); }
             if (b2) b2.classList.add('active');
-            toast('Loupe active : survolez la page pour agrandir les détails.');
+            toast(getT().toastLoupeActive);
         }
         if (typeof updateModalToolMode === 'function') {
             updateModalToolMode();
@@ -3096,7 +3156,7 @@ export function startViewer(project, options = {}) {
             }
         }
 
-        if (topCount) topCount.textContent = `Page ${displayLabel} / ${TOTAL}`;
+        if (topCount) topCount.textContent = getT().pageCounter(displayLabel, TOTAL);
         if (toolCount) toolCount.textContent = `${displayLabel} / ${TOTAL}`;
 
         const isAtStart = currentPage <= 1;
@@ -3158,9 +3218,9 @@ export function startViewer(project, options = {}) {
             btn.classList.toggle('muted', !soundEnabled);
             btn.classList.toggle('active', !soundEnabled);
             btn.setAttribute('aria-pressed', soundEnabled ? 'false' : 'true');
-            btn.title = soundEnabled ? 'Couper le son de page (M)' : 'Activer le son de page (M)';
+            btn.title = soundEnabled ? getT().soundMute : getT().soundUnmute;
         }
-        toast(soundEnabled ? 'Son activé 🔊' : 'Son coupé 🔇');
+        toast(soundEnabled ? getT().toastSoundOn : getT().toastSoundOff);
     };
 
     window.toggleFullscreen = async () => {
@@ -3175,7 +3235,7 @@ export function startViewer(project, options = {}) {
             if (app) {
                 const on = app.classList.toggle('immersive');
                 app.classList.toggle('is-fs', on);
-                toast(on ? 'Plein écran immersif activé.' : 'Mode immersif désactivé.');
+                toast(on ? getT().toastFullscreenOn : getT().toastFullscreenOff);
             }
         }
     };
@@ -3197,14 +3257,14 @@ export function startViewer(project, options = {}) {
             b.type = 'button';
             b.className = 'thumb';
             b.dataset.page = pNum;
-            b.setAttribute('aria-label', `Aller à la page ${pNum}`);
+            b.setAttribute('aria-label', getT().tocThumbAria(pNum));
 
             const tpg = document.createElement('span');
             tpg.className = 'tpg';
             const img = document.createElement('img');
             const primaryThumb = page.thumbPath ? asset(page.thumbPath) : (page.imagePath ? asset(page.imagePath) : asset(`public/pages/thumbs/page-${pad3}.webp`));
             img.src = primaryThumb;
-            img.alt = `Miniature ${pNum}`;
+            img.alt = getT().tocThumbAlt(pNum);
             img.loading = 'lazy';
             img.onerror = () => {
                 img.src = page.imagePath ? asset(page.imagePath) : asset(`public/pages/page-${pad3}.webp`);
@@ -3267,7 +3327,17 @@ export function startViewer(project, options = {}) {
         const colorsEl = document.getElementById('colors');
         if (!colorsEl) return;
         colorsEl.innerHTML = '';
-        COLORS.forEach(([hex, name]) => {
+        const colorNameMap = {
+            '#17143F': getT().colors.ink,
+            '#0ea5e9': getT().colors.skyBlue,
+            '#7B6DFF': getT().colors.purple,
+            '#FF3D81': getT().colors.pink,
+            '#12A37A': getT().colors.green,
+            '#FFD84D': getT().colors.amber,
+            '#FFFFFF': getT().colors.white,
+        };
+        COLORS.forEach(([hex, defaultName]) => {
+            const name = colorNameMap[hex] || defaultName;
             const b = document.createElement('button');
             b.type = 'button';
             b.className = 'sw';
@@ -3330,11 +3400,11 @@ export function startViewer(project, options = {}) {
                         initModalAnnotCanvas();
                     }
                 }
-                toast('Dernier trait annulé.');
+                toast(getT().toastStrokeUndone);
                 return;
             }
         }
-        toast('Rien à annuler.');
+        toast(getT().toastNothingToUndo);
     };
 
     let activeModalPageNum = null;
@@ -3382,6 +3452,7 @@ export function startViewer(project, options = {}) {
 
     let isModalAnnotDrawing = false;
     let modalAnnotStartX = 0, modalAnnotStartY = 0, modalAnnotLastX = 0, modalAnnotLastY = 0;
+    let modalAnnotLastW = 5;
     let modalAnnotLastTime = 0;
 
     function setupModalAnnotListeners() {
@@ -3533,6 +3604,7 @@ export function startViewer(project, options = {}) {
 
         canvas.addEventListener('pointerup', finishModalDrawing);
         canvas.addEventListener('pointercancel', finishModalDrawing);
+        canvas.addEventListener('pointerleave', finishModalDrawing);
     }
 
     function syncModalAnnotToPage() {
@@ -3673,7 +3745,7 @@ export function startViewer(project, options = {}) {
                 });
                 renderPageArrows(activeModalPageNum);
                 renderModalArrows();
-                toast('Flèche tracée.');
+                toast(getT().toastArrowDrawn);
             }
             modalArrowStart = null;
         };
@@ -3947,7 +4019,7 @@ export function startViewer(project, options = {}) {
         const mOverlay = document.getElementById('modal-overlay');
         if (!vp || !modalEl || !modalEl.classList.contains('open')) return;
 
-        if (activeViewerTool === 'pen' || activeViewerTool === 'eraser') {
+        if (activeViewerTool === 'pen' || activeViewerTool === 'calligraphy' || activeViewerTool === 'eraser') {
             if (mCanvas) mCanvas.style.pointerEvents = 'auto';
             if (mArrow) mArrow.style.pointerEvents = 'none';
             if (mOverlay) mOverlay.style.pointerEvents = 'none';
@@ -3982,10 +4054,10 @@ export function startViewer(project, options = {}) {
         activeModalZoneRect = zoneRect || { x: 0, y: 0, width: 100, height: 100 };
         activeModalInter = inter || null;
 
-        modalEl.setAttribute('aria-label', alt || 'Zoom HD');
+        modalEl.setAttribute('aria-label', alt || getT().zoomModalTitle);
         const titleEl = document.getElementById('zoom-modal-title');
         if (titleEl) {
-            titleEl.innerHTML = `<span style="color:var(--brand);margin-right:6px">🔍</span>${escapeHtml(alt || 'Zoom Haute Définition')}`;
+            titleEl.innerHTML = `<span style="color:var(--brand);margin-right:6px">🔍</span>${escapeHtml(alt || getT().zoomModalTitle)}`;
         }
 
         const isCroppedSubzone = activeModalZoneRect.width < 99 || activeModalZoneRect.height < 99;
@@ -4082,7 +4154,7 @@ export function startViewer(project, options = {}) {
         if (!embedUrl) return;
 
         if (titleEl) {
-            titleEl.innerHTML = `<span style="color:#ef4444;">▶</span> ${escapeHtml(title || 'Vidéo YouTube')}`;
+            titleEl.innerHTML = `<span style="color:#ef4444;">▶</span> ${escapeHtml(title || getT().videoModalTitle)}`;
         }
         if (ytBtn) {
             ytBtn.href = url || '#';
@@ -4200,7 +4272,7 @@ export function startViewer(project, options = {}) {
     if (modalWrapEl) {
         modalWrapEl.addEventListener('mousedown', (e) => {
             if (modalZoom <= 1 && e.button !== 1 && !e.spaceKey) return;
-            if (['pen', 'eraser', 'arrow', 'bucket'].includes(activeViewerTool) && e.button === 0 && !e.spaceKey) return;
+            if (['pen', 'calligraphy', 'eraser', 'arrow', 'bucket', 'circle'].includes(activeViewerTool) && e.button === 0 && !e.spaceKey) return;
             e.preventDefault();
             isDragging = true;
             dragStart = { x: e.clientX, y: e.clientY };
@@ -4285,9 +4357,299 @@ export function startViewer(project, options = {}) {
         }
     }, true);
 
+    function setViewerLanguage(lang) {
+        if (lang !== 'fr' && lang !== 'ar') {
+            lang = currentLang === 'fr' ? 'ar' : 'fr';
+        }
+        currentLang = lang;
+        try {
+            localStorage.setItem('flipbook_lang', currentLang);
+            localStorage.setItem('locale', currentLang);
+        } catch (e) { }
+
+        const isAr = currentLang === 'ar';
+        const t = getT();
+
+        // 1. Root and App container RTL/LTR attributes
+        document.documentElement.lang = currentLang;
+        document.documentElement.dir = isAr ? 'rtl' : 'ltr';
+        const app = document.getElementById('app');
+        if (app) {
+            app.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+            app.setAttribute('lang', currentLang);
+        }
+
+        // 2. Language toggle button
+        const btnLang = document.getElementById('btnLangToggle');
+        if (btnLang) {
+            btnLang.textContent = t.langToggle;
+            btnLang.title = t.langToggleTitle;
+            btnLang.setAttribute('aria-label', t.langToggleTitle);
+        }
+        const btnPwa = document.getElementById('btnInstallPwa');
+        if (btnPwa) {
+            btnPwa.title = t.installPwa;
+            btnPwa.setAttribute('aria-label', t.installPwa);
+        }
+        const btnPwaText = document.getElementById('btnInstallPwaText');
+        if (btnPwaText) {
+            btnPwaText.textContent = t.installPwa;
+        }
+
+        // 3. Header & Mode Switchers
+        const btnFlip = document.getElementById('btnModeFlipbook');
+        if (btnFlip) {
+            btnFlip.textContent = t.flipbookMode;
+            btnFlip.title = t.flipbookModeTitle;
+            btnFlip.setAttribute('aria-label', t.flipbookModeTitle);
+        }
+        const btnSlides = document.getElementById('btnModeSlides');
+        if (btnSlides) {
+            btnSlides.textContent = t.slidesMode;
+            btnSlides.title = t.slidesModeTitle;
+            btnSlides.setAttribute('aria-label', t.slidesModeTitle);
+        }
+        const fsBtn = document.getElementById('fsBtn');
+        if (fsBtn) {
+            fsBtn.title = t.fullscreen;
+            fsBtn.setAttribute('aria-label', t.fullscreen);
+        }
+        const soundBtn = document.getElementById('soundBtn');
+        if (soundBtn) {
+            soundBtn.title = soundEnabled ? t.soundMute : t.soundUnmute;
+        }
+        const tocBtn = document.getElementById('tocBtn');
+        if (tocBtn) {
+            tocBtn.title = t.tableOfContents;
+            tocBtn.setAttribute('aria-label', t.tableOfContents);
+        }
+        const pagePill = document.getElementById('pagePill');
+        if (pagePill) {
+            pagePill.setAttribute('aria-label', t.pagePillAria);
+            pagePill.title = t.pagePromptPlaceholder;
+        }
+        const promptInput = document.getElementById('promptInput');
+        if (promptInput) {
+            promptInput.placeholder = t.pagePromptPlaceholder;
+            promptInput.setAttribute('aria-label', t.pagePromptPlaceholder);
+        }
+        const promptGo = document.getElementById('promptGo');
+        if (promptGo) {
+            promptGo.textContent = t.pagePromptSubmit;
+        }
+        const tocTitle = document.getElementById('tocTitle');
+        if (tocTitle) {
+            tocTitle.textContent = t.tableOfContents;
+        }
+        const tocClose = document.getElementById('tocClose');
+        if (tocClose) {
+            tocClose.setAttribute('aria-label', t.close);
+            tocClose.title = t.close;
+        }
+
+        // 4. Navigation buttons
+        const prevBtn = document.getElementById('prev');
+        if (prevBtn) {
+            prevBtn.setAttribute('aria-label', t.prevPage);
+            prevBtn.title = t.prevPage;
+        }
+        const nextBtn = document.getElementById('next');
+        if (nextBtn) {
+            nextBtn.setAttribute('aria-label', t.nextPage);
+            nextBtn.title = t.nextPage;
+        }
+        const tPrev = document.getElementById('tPrev');
+        if (tPrev) {
+            tPrev.setAttribute('aria-label', t.prevPage);
+            tPrev.title = tPrev.textContent = t.prevPage;
+        }
+        const tNext = document.getElementById('tNext');
+        if (tNext) {
+            tNext.setAttribute('aria-label', t.nextPage);
+            tNext.title = tNext.textContent = t.nextPage;
+        }
+
+        // 5. Dock toolbar tools
+        const penBtn = document.getElementById('penBtn');
+        if (penBtn) { penBtn.title = t.penTool; penBtn.setAttribute('aria-label', t.penTool); }
+        const calligBtn = document.getElementById('calligraphyBtn');
+        if (calligBtn) { calligBtn.title = t.calligraphyTool; calligBtn.setAttribute('aria-label', t.calligraphyTool); }
+        const eraserBtn = document.getElementById('eraserBtn');
+        if (eraserBtn) { eraserBtn.title = t.eraserTool; eraserBtn.setAttribute('aria-label', t.eraserTool); }
+        const bucketBtn = document.getElementById('bucketBtn');
+        if (bucketBtn) { bucketBtn.title = t.bucketTool; bucketBtn.setAttribute('aria-label', t.bucketTool); }
+        const arrowToolBtn = document.getElementById('arrowToolBtn');
+        if (arrowToolBtn) { arrowToolBtn.title = t.arrowTool; arrowToolBtn.setAttribute('aria-label', t.arrowTool); }
+        const circleToolBtn = document.getElementById('circleToolBtn');
+        if (circleToolBtn) { circleToolBtn.title = t.circleTool; circleToolBtn.setAttribute('aria-label', t.circleTool); }
+        const loupeBtn = document.getElementById('loupeBtn');
+        if (loupeBtn) { loupeBtn.title = t.loupeTool; loupeBtn.setAttribute('aria-label', t.loupeTool); }
+        const scoreBtn = document.getElementById('btnScorePanel');
+        if (scoreBtn) { scoreBtn.title = t.scoreTitle; scoreBtn.setAttribute('aria-label', t.scoreTitle); }
+
+        // 6. Floating sub-palettes
+        const undoAnnot = document.getElementById('undoAnnotBtn');
+        if (undoAnnot) { undoAnnot.title = t.undoStroke; undoAnnot.setAttribute('aria-label', t.undoStroke); }
+        const clearAnnot = document.getElementById('clearAnnotBtn');
+        if (clearAnnot) { clearAnnot.title = t.clearPageDrawings; clearAnnot.setAttribute('aria-label', t.clearPageDrawings); }
+
+        const undoBucket = document.getElementById('undoBucketBtn');
+        if (undoBucket) { undoBucket.title = t.undoColoring; undoBucket.setAttribute('aria-label', t.undoColoring); }
+        const clearBucket = document.getElementById('clearBucketBtn');
+        if (clearBucket) { clearBucket.title = t.clearColoring; clearBucket.setAttribute('aria-label', t.clearColoring); }
+        const valBucket = document.getElementById('validateBucketBtn');
+        if (valBucket) { valBucket.title = t.checkAnswers; valBucket.setAttribute('aria-label', t.checkAnswers); }
+
+        const undoArrow = document.getElementById('undoArrowBtn');
+        if (undoArrow) { undoArrow.title = t.undoArrow; undoArrow.setAttribute('aria-label', t.undoArrow); }
+        const clearArrow = document.getElementById('clearArrowBtn');
+        if (clearArrow) { clearArrow.title = t.clearArrows; clearArrow.setAttribute('aria-label', t.clearArrows); }
+        const valArrow = document.getElementById('validateArrowBtn');
+        if (valArrow) { valArrow.title = t.checkAnswers; valArrow.setAttribute('aria-label', t.checkAnswers); }
+
+        // Rebuild palettes with translated names
+        buildColors();
+        buildBucketColors();
+
+        // 7. Modals
+        const modalClose = document.getElementById('modalClose');
+        if (modalClose) { modalClose.title = t.close; modalClose.setAttribute('aria-label', t.close); }
+        const mZoom = document.getElementById('modal-mode-zoom');
+        if (mZoom) mZoom.title = t.zoomPanMode;
+        const mPen = document.getElementById('modal-mode-pen');
+        if (mPen) mPen.title = t.zoomPenMode;
+        const mCal = document.getElementById('modal-mode-calligraphy');
+        if (mCal) mCal.title = t.zoomCalligraphyMode;
+        const mEra = document.getElementById('modal-mode-eraser');
+        if (mEra) mEra.title = t.zoomEraserMode;
+        const mArr = document.getElementById('modal-mode-arrow');
+        if (mArr) mArr.title = t.zoomArrowMode;
+        const mUndo = document.getElementById('modal-annot-undo');
+        if (mUndo) { mUndo.title = t.undoStroke; mUndo.setAttribute('aria-label', t.undoStroke); }
+        const mClr = document.getElementById('modal-annot-clear');
+        if (mClr) { mClr.title = t.clearPageDrawings; mClr.setAttribute('aria-label', t.clearPageDrawings); }
+
+        const vClose = document.getElementById('videoModalClose');
+        if (vClose) { vClose.title = t.close; vClose.setAttribute('aria-label', t.close); }
+        const ytBtn = document.getElementById('video-modal-yt-btn');
+        if (ytBtn) { ytBtn.title = t.openOnYouTube; ytBtn.textContent = t.openOnYouTube; }
+
+        // 8. Dynamic on-page exercise buttons
+        document.querySelectorAll('.btn-validate-tasks').forEach(b => {
+            b.textContent = t.checkAnswers;
+        });
+        document.querySelectorAll('.btn-show-answers').forEach(b => {
+            b.textContent = t.showAnswers;
+        });
+        document.querySelectorAll('.btn-reset-tasks').forEach(b => {
+            b.textContent = t.retry;
+        });
+        document.querySelectorAll('.widget-score-btn:not([data-custom-label="1"])').forEach(b => {
+            b.textContent = t.validateBtn;
+        });
+        document.querySelectorAll('.widget-reveal:not(.revealed)').forEach(m => {
+            m.textContent = t.revealClick;
+        });
+        document.querySelectorAll('.score-title-text').forEach(el => {
+            el.textContent = t.scoreTitle;
+        });
+
+        // 9. Rebuild TOC thumbnails aria labels
+        buildThumbs();
+
+        // 10. Page counter update
+        updateUI();
+
+        // 11. Toast notification of language change
+        toast(t.toastLangChanged);
+    }
+
+    window.setViewerLanguage = setViewerLanguage;
+    window.toggleViewerLanguage = () => setViewerLanguage();
+
+    // ═══════════════════════════════════════════════════════════
+    // PWA & KIOSK MODE SUPPORT
+    // ═══════════════════════════════════════════════════════════
+    let isKiosk = false;
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        isKiosk = urlParams.get('kiosk') === '1' || urlParams.get('kiosk') === 'true' ||
+                  window.matchMedia('(display-mode: fullscreen)').matches;
+    } catch (e) { }
+
+    function exitKioskMode() {
+        if (confirm("Voulez-vous vraiment quitter le flipbook ?")) {
+            try {
+                if (document.fullscreenElement) {
+                    document.exitFullscreen().catch(() => {});
+                }
+            } catch (e) { }
+
+            try {
+                window.open('', '_self', '');
+                window.close();
+            } catch (e) { }
+
+            try {
+                window.close();
+            } catch (e) { }
+
+            setTimeout(() => {
+                toast("Fermez la fenêtre ou appuyez sur Alt+F4.");
+            }, 300);
+        }
+    }
+    window.exitKioskMode = exitKioskMode;
+
+    if (isKiosk) {
+        const appEl = document.getElementById('app');
+        if (appEl) appEl.classList.add('is-kiosk');
+        const kioskBtn = document.getElementById('btnKioskExit');
+        if (kioskBtn) kioskBtn.style.display = 'inline-flex';
+
+        // On first interaction: enter fullscreen mode automatically
+        const enterKioskFs = () => {
+            if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            }
+        };
+        document.addEventListener('click', enterKioskFs, { once: true });
+        document.addEventListener('touchstart', enterKioskFs, { once: true, passive: true });
+    }
+
+    // PWA beforeinstallprompt handler
+    let deferredInstallPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        const btn = document.getElementById('btnInstallPwa');
+        if (btn) btn.style.display = 'inline-flex';
+    });
+
+    window.addEventListener('appinstalled', () => {
+        deferredInstallPrompt = null;
+        const btn = document.getElementById('btnInstallPwa');
+        if (btn) btn.style.display = 'none';
+        toast(getT().toastPwaInstalled);
+    });
+
+    window.triggerPwaInstall = async () => {
+        if (!deferredInstallPrompt) return;
+        try {
+            deferredInstallPrompt.prompt();
+            const choice = await deferredInstallPrompt.userChoice;
+            if (choice.outcome === 'accepted') {
+                deferredInstallPrompt = null;
+                const btn = document.getElementById('btnInstallPwa');
+                if (btn) btn.style.display = 'none';
+            }
+        } catch (err) { }
+    };
+
     buildColors();
     buildBucketColors();
     buildThumbs();
+    syncModeButtons();
     if (currentMode === 'slides') {
         initSlidesView();
     } else {

@@ -9,12 +9,16 @@ import {
   Save,
   FolderOpenDot,
   ArrowRight,
+  ArrowLeft,
   Highlighter,
   Lasso,
   Volume2,
   Music,
   Video,
   ZoomIn,
+  ZoomOut,
+  Maximize2,
+  Minimize2,
   TextCursorInput,
   Eye,
   CheckSquare,
@@ -31,9 +35,8 @@ import {
   X,
   Move,
 } from 'lucide-react';
-import StudioStepper from './StudioStepper';
-import PageConfigPanel from './page-config/PageConfigPanel';
-import PageThumbnailsStrip from './page-config/PageThumbnailsStrip';
+import PageSidebar from './page-config/PageSidebar';
+import PagePropertiesSidebar from './page-config/PagePropertiesSidebar';
 import LivePreviewModal from './page-config/LivePreviewModal';
 import {
   TOOL_DEFS,
@@ -61,6 +64,7 @@ interface Props {
     pages: StudioConfigPage[];
     meta: { title?: string };
   }) => void;
+  onBackToUpload?: (currentPages?: StudioConfigPage[]) => void;
 }
 
 let uidCounter = 1;
@@ -94,6 +98,7 @@ export default function StudioPageConfigView({
   initialPages,
   persistedPages,
   onProceedToConversion,
+  onBackToUpload,
 }: Props) {
   const [isLoadingPdf, setIsLoadingPdf] = useState<boolean>(() => {
     if (persistedPages && persistedPages.length > 0) return false;
@@ -135,6 +140,7 @@ export default function StudioPageConfigView({
   const [isLiveOpen, setIsLiveOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [aspectRatio, setAspectRatio] = useState<number>(3 / 4);
+  const [zoom, setZoom] = useState<number>(1);
 
   // Drawing state
   const [draftRect, setDraftRect] = useState<{
@@ -197,7 +203,7 @@ export default function StudioPageConfigView({
             prev.map((p) => (p.kind === 'pdf' && !p.doc ? { ...p, doc } : p))
           );
         })
-        .catch(() => {});
+        .catch(() => { });
       return;
     }
 
@@ -288,7 +294,7 @@ export default function StudioPageConfigView({
     const canvas = canvasRef.current;
     if (!canvas || !currentPage) return;
 
-    renderPageToCanvas(currentPage, canvas, 1000).then(() => {
+    renderPageToCanvas(currentPage, canvas, 1600).then(() => {
       if (cancelled) return;
       if (canvas.width > 0 && canvas.height > 0) {
         setAspectRatio(canvas.width / canvas.height);
@@ -448,7 +454,7 @@ export default function StudioPageConfigView({
         extractTextFromPageRect(currentPage, searchRect).then((extracted) => {
           if (extracted && extracted.trim()) {
             const clean = extracted.trim();
-            navigator.clipboard.writeText(clean).catch(() => {});
+            navigator.clipboard.writeText(clean).catch(() => { });
             setSelectedTextInfo({
               text: clean,
               rect: searchRect,
@@ -598,22 +604,22 @@ export default function StudioPageConfigView({
             prev.map((p, i) =>
               i === currentPageIndex
                 ? {
-                    ...p,
-                    items: p.items.map((it) =>
-                      it.id === targetItemId
-                        ? {
-                            ...it,
-                            outerPolygonPoints: result.outerPolygonPoints,
-                            outerContourSvg: result.outerContourSvg,
-                            silhouetteMaskDataUrl: result.silhouetteMaskDataUrl,
-                            regions: result.regions,
-                            cropImageDataUrl: result.cropImageDataUrl,
-                            lineThreshold: result.lineThreshold,
-                            smoothing: result.smoothing,
-                          }
-                        : it
-                    ),
-                  }
+                  ...p,
+                  items: p.items.map((it) =>
+                    it.id === targetItemId
+                      ? {
+                        ...it,
+                        outerPolygonPoints: result.outerPolygonPoints,
+                        outerContourSvg: result.outerContourSvg,
+                        silhouetteMaskDataUrl: result.silhouetteMaskDataUrl,
+                        regions: result.regions,
+                        cropImageDataUrl: result.cropImageDataUrl,
+                        lineThreshold: result.lineThreshold,
+                        smoothing: result.smoothing,
+                      }
+                      : it
+                  ),
+                }
                 : p
             )
           );
@@ -663,23 +669,23 @@ export default function StudioPageConfigView({
               g = Math.round(g / 4);
               b = Math.round(b / 4);
               detectedColor = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
-            } catch (e) {}
+            } catch (e) { }
 
             setPages((prev) =>
               prev.map((p, i) =>
                 i === currentPageIndex
                   ? {
-                      ...p,
-                      items: p.items.map((it) =>
-                        it.id === targetItemId
-                          ? {
-                              ...it,
-                              dragImageDataUrl: cropDataUrl,
-                              maskColor: detectedColor,
-                            }
-                          : it
-                      ),
-                    }
+                    ...p,
+                    items: p.items.map((it) =>
+                      it.id === targetItemId
+                        ? {
+                          ...it,
+                          dragImageDataUrl: cropDataUrl,
+                          maskColor: detectedColor,
+                        }
+                        : it
+                    ),
+                  }
                   : p
               )
             );
@@ -696,9 +702,9 @@ export default function StudioPageConfigView({
       prev.map((p, i) =>
         i === currentPageIndex
           ? {
-              ...p,
-              items: p.items.map((it) => (it.id === id ? { ...it, ...updates } : it)),
-            }
+            ...p,
+            items: p.items.map((it) => (it.id === id ? { ...it, ...updates } : it)),
+          }
           : p
       )
     );
@@ -832,7 +838,7 @@ export default function StudioPageConfigView({
         try {
           docToUse = await loadPdfDocument(initialPdfFile);
           currentDocRef.current = docToUse;
-        } catch {}
+        } catch { }
       }
 
       const imported: StudioConfigPage[] = data.pages.map(
@@ -950,35 +956,28 @@ export default function StudioPageConfigView({
   };
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full min-h-screen flex flex-col justify-between">
       {/* Ambient glowing background blur orbs */}
       <div className="absolute -top-10 left-1/4 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute top-1/3 -right-10 w-96 h-96 bg-purple-600/15 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 -left-10 w-80 h-80 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 py-8 space-y-6">
-        {/* 1. Header with exact requested title & tags */}
-        <header className="text-center space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-semibold shadow-inner">
-            <Sparkles className="w-4 h-4 animate-pulse text-indigo-400" />
-            <span>Flipbook Studio Pro · Éditeur Interactif</span>
-          </div>
+      <div className="relative z-10 max-w-[1536px] 2xl:max-w-[1720px] mx-auto px-4 py-3 space-y-3 w-full flex-1 flex flex-col justify-between">
+        {/* 1. Action & Navigation Menu Bar */}
+        <div className="glass-panel rounded-2xl p-3 md:p-3.5 shadow-xl flex flex-wrap items-center gap-3">
+          {/* Back to Step 1: Upload */}
+          {onBackToUpload && (
+            <button
+              type="button"
+              onClick={() => onBackToUpload(pages)}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-slate-200 hover:text-white text-xs sm:text-sm font-semibold transition active:scale-95 shadow-sm"
+              title="Retourner à l'étape 1 (Upload document PDF)"
+            >
+              <ArrowLeft className="w-4 h-4 text-indigo-400" />
+              <span>Upload PDF</span>
+            </button>
+          )}
 
-          <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-white via-indigo-200 to-indigo-400 bg-clip-text text-transparent">
-            Convertisseur &amp; Configurateur de Flipbook
-          </h1>
-
-          <p className="text-slate-400 text-base md:text-lg max-w-2xl mx-auto font-normal">
-            Configurez chaque page (textes à lire, modales HD, pistes audio) avant
-            de compiler votre Flipbook HTML5 autonome.
-          </p>
-        </header>
-
-        {/* 2. Stepper Card with Step 2 Activated */}
-        <StudioStepper currentStep={2} />
-
-        {/* 3. Action & Navigation Menu Bar */}
-        <div className="glass-panel rounded-2xl p-4 shadow-xl flex flex-wrap items-center gap-3">
           {/* Previous / Next Arrow Controls */}
           <div className="flex items-center gap-2 mr-2">
             <button
@@ -1064,9 +1063,9 @@ export default function StudioPageConfigView({
         </div>
 
         {/* 4. Main Glass Canvas & Configuration Section */}
-        <main className="glass-panel rounded-3xl p-4 md:p-6 shadow-2xl glow-effect">
+        <main className="glass-panel rounded-3xl p-3 md:p-3.5 shadow-2xl glow-effect flex-1 flex flex-col min-h-0">
           {isLoadingPdf ? (
-            <div className="py-24 flex flex-col items-center justify-center gap-4 text-center">
+            <div className="py-24 flex flex-col items-center justify-center gap-4 text-center flex-1">
               <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
               <h3 className="text-lg font-bold text-white">
                 Chargement des pages du PDF...
@@ -1077,750 +1076,793 @@ export default function StudioPageConfigView({
             </div>
           ) : (
             <>
-              <div className="grid lg:grid-cols-[minmax(0,1fr)_340px] gap-6">
-                {/* Left Canvas Section */}
-                <section className="min-w-0 flex flex-col">
-                  {/* Tool Bar */}
-                  <div
-                    className="flex gap-2 overflow-x-auto pb-3 custom-scrollbar"
-                    role="toolbar"
-                    aria-label="Outils d'interaction"
-                  >
-                    {(Object.keys(TOOL_DEFS) as InteractiveToolKey[]).map((key) => {
-                      const def = TOOL_DEFS[key];
-                      const Icon = TOOL_ICONS[key];
-                      const isActive = activeTool === key;
-
-                      return (
-                        <button
-                          key={key}
-                          type="button"
-                          onClick={() => {
-                            setSelectedTextInfo(null);
-                            setActiveTool((prev) => (prev === key ? null : key));
-                          }}
-                          className={[
-                            'flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border',
-                            isActive
-                              ? 'bg-indigo-600/30 border-indigo-500 text-white shadow-md shadow-indigo-600/30'
-                              : 'bg-slate-900/80 border-slate-700/70 text-slate-300 hover:border-indigo-500/60 hover:text-white',
-                          ].join(' ')}
-                        >
-                          <Icon className="w-4 h-4" />
-                          <span>{def.n}</span>
-                        </button>
-                      );
-                    })}
+              <div className="grid grid-cols-1 lg:grid-cols-[290px_minmax(0,1fr)_320px] xl:grid-cols-[330px_minmax(0,1fr)_350px] gap-4 items-stretch flex-1 min-h-0">
+                {/* 1. Left Sidebar: Pages · Éléments · Widgets */}
+                {currentPage && (
+                  <div className="min-w-0 flex flex-col h-full">
+                    <PageSidebar
+                      pages={pages}
+                      currentPageIndex={currentPageIndex}
+                      onSelectPage={setCurrentPageIndex}
+                      onDuplicatePage={handleDuplicatePage}
+                      onDeletePage={handleDeletePage}
+                      onAddBlankPage={handleAddBlankPage}
+                      onImportPdfPages={handleImportPdfPages}
+                      onReorderPages={handleReorderPages}
+                      onToast={showToast}
+                      page={currentPage}
+                      selectedItemId={selectedItemId}
+                      onSelectItem={setSelectedItemId}
+                      onUpdateItem={handleUpdateItem}
+                      onDeleteItem={handleDeleteItem}
+                      activeTool={activeTool}
+                      onPickTool={(key) => {
+                        setSelectedTextInfo(null);
+                        setActiveTool((prev) => (prev === key ? null : key));
+                      }}
+                    />
                   </div>
+                )}
 
-                  {/* Tool Hint */}
-                  <div className="flex items-center justify-between gap-2 mb-3 min-h-[24px]">
-                    <p className="text-xs text-slate-400">
-                      {activeTool
-                        ? TOOL_DEFS[activeTool].hint
-                        : 'Aucun outil actif : cliquez sur un élément de la page pour le sélectionner.'}
-                    </p>
-                    {activeTool === 'select' && currentPage && currentPage.kind === 'pdf' && (
+                {/* 2. Center Canvas Section */}
+                <section className="min-w-0 flex flex-col h-full flex-1 relative">
+                  {/* Active Tool Banner (rendered only when a tool is actively selected) */}
+                  {activeTool && (
+                    <div className="flex items-center justify-between gap-2 px-3 py-1.5 mb-2.5 rounded-xl bg-slate-900/90 border border-indigo-500/40 shadow-sm text-xs">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse flex-none" />
+                        <p className="text-slate-200 font-medium truncate">
+                          <strong className="text-indigo-300">{TOOL_DEFS[activeTool].n} :</strong>{' '}
+                          {TOOL_DEFS[activeTool].hint}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-none">
+                        {activeTool === 'select' && currentPage && currentPage.kind === 'pdf' && (
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              const all = await extractAllTextFromPage(currentPage);
+                              if (all && all.trim()) {
+                                await navigator.clipboard.writeText(all.trim());
+                                showToast(`Tout le texte de la page copié (${all.trim().length} car.) !`);
+                              } else {
+                                showToast('Aucun texte détecté sur cette page.');
+                              }
+                            }}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 text-[11px] font-semibold border border-sky-500/30 transition shrink-0"
+                          >
+                            <Copy className="w-3.5 h-3.5" />
+                            <span>Copier tout</span>
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setActiveTool(null)}
+                          className="px-2 py-0.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-[11px] font-medium transition"
+                        >
+                          ✕ Terminer
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Canvas Stage Frame Wrapper */}
+                  <div className="relative flex-1 h-full min-h-[700px] lg:h-[calc(100vh-170px)]">
+                    {/* Floating Zoom & Scale Controls (Top of Canva) */}
+                    <div className="absolute top-3 right-3 z-30 flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-900/90 backdrop-blur-md border border-slate-700/80 shadow-2xl shadow-black/60 text-xs">
                       <button
                         type="button"
-                        onClick={async () => {
-                          const all = await extractAllTextFromPage(currentPage);
-                          if (all && all.trim()) {
-                            await navigator.clipboard.writeText(all.trim());
-                            showToast(`Tout le texte de la page copié (${all.trim().length} car.) !`);
-                          } else {
-                            showToast('Aucun texte détecté sur cette page.');
-                          }
-                        }}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 text-xs font-semibold border border-sky-500/30 transition shrink-0"
+                        onClick={() => setZoom((prev) => Math.max(0.5, Math.round((prev - 0.1) * 10) / 10))}
+                        title="Zoom arrière (-10%)"
+                        className="p-1 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition active:scale-95"
                       >
-                        <Copy className="w-3.5 h-3.5" />
-                        <span>Copier tout le texte de la page</span>
+                        <ZoomOut className="w-3.5 h-3.5" />
                       </button>
-                    )}
-                  </div>
 
-                  {/* Canvas Stage Frame */}
-                  <div className="rounded-2xl bg-slate-900/60 border border-slate-800 p-4 flex justify-center items-center">
-                    <div
-                      className="relative shadow-2xl shadow-black/50 select-none max-h-[60vh] max-w-full"
-                      style={{ width: `min(100%, calc(60vh * ${aspectRatio}))` }}
-                    >
-                      <canvas
-                        id="studio-main-cv"
-                        ref={canvasRef}
-                        className="block w-full bg-white rounded shadow"
-                      />
-
-                      {/* Interactive Drawing Overlay */}
-                      <div
-                        ref={overlayRef}
-                        onPointerDown={handlePointerDown}
-                        onPointerMove={handlePointerMove}
-                        onPointerUp={handlePointerUp}
-                        className={[
-                          'absolute inset-0',
-                          activeTool ? 'cursor-crosshair' : 'cursor-default',
-                        ].join(' ')}
-                        style={{ touchAction: 'none' }}
+                      <button
+                        type="button"
+                        onClick={() => setZoom(1)}
+                        title="Réinitialiser le zoom (100%)"
+                        className="px-2 py-0.5 rounded-lg text-slate-200 hover:text-white hover:bg-slate-800 text-[11px] font-semibold tabular-nums transition active:scale-95"
                       >
-                        {/* Rendered Items on Overlay */}
-                        {currentPage?.items?.map((it) => {
-                          const def = TOOL_DEFS[it.type];
-                          const col = it.color || def?.c || '#6366f1';
-                          const isSelected = it.id === selectedItemId;
+                        {Math.round(zoom * 100)}%
+                      </button>
 
-                          // Special Arrow rendering
-                          if (it.type === 'arrow' && it.startX !== undefined && it.endX !== undefined) {
-                            const sx = it.startX * 100;
-                            const sy = it.startY! * 100;
-                            const ex = it.endX * 100;
-                            const ey = it.endY! * 100;
-                            const tolPct = (it.tolerance || 0.06) * 100;
-                            return (
-                              <div key={it.id} className="absolute inset-0 pointer-events-none">
-                                <svg className="w-full h-full overflow-visible">
-                                  <defs>
-                                    <marker
-                                      id={`studio-arrow-head-${it.id}`}
-                                      markerWidth="6"
-                                      markerHeight="6"
-                                      refX="5"
-                                      refY="2.5"
-                                      orient="auto"
-                                    >
-                                      <path d="M0,0.5 L0,4.5 L5,2.5 z" fill={isSelected ? '#38bdf8' : col} />
-                                    </marker>
-                                  </defs>
-                                  {/* Tolerance radius preview on selection */}
-                                  {isSelected && (
-                                    <>
-                                      <circle
-                                        cx={`${sx}%`}
-                                        cy={`${sy}%`}
-                                        r={`${tolPct}%`}
-                                        fill="#06b6d418"
-                                        stroke="#06b6d4"
-                                        strokeWidth="1.5"
-                                        strokeDasharray="3,3"
-                                      />
-                                      <circle
-                                        cx={`${ex}%`}
-                                        cy={`${ey}%`}
-                                        r={`${tolPct}%`}
-                                        fill="#06b6d418"
-                                        stroke="#06b6d4"
-                                        strokeWidth="1.5"
-                                        strokeDasharray="3,3"
-                                      />
-                                    </>
-                                  )}
-                                  {/* Directed Arrow Line */}
-                                  <line
-                                    x1={`${sx}%`}
-                                    y1={`${sy}%`}
-                                    x2={`${ex}%`}
-                                    y2={`${ey}%`}
-                                    stroke={isSelected ? '#38bdf8' : col}
-                                    strokeWidth={isSelected ? '2' : '1.5'}
-                                    markerEnd={`url(#studio-arrow-head-${it.id})`}
-                                  />
-                                  {/* Start & End Anchor Dots */}
-                                  <circle cx={`${sx}%`} cy={`${sy}%`} r="2.5" fill="#22c55e" stroke="#ffffff" strokeWidth="1" />
-                                  <circle cx={`${ex}%`} cy={`${ey}%`} r="2.5" fill="#ef4444" stroke="#ffffff" strokeWidth="1" />
-                                </svg>
-                                <span
-                                  className="absolute font-bold text-[10px] px-1.5 py-0.5 rounded shadow text-white pointer-events-none whitespace-nowrap"
+                      <button
+                        type="button"
+                        onClick={() => setZoom((prev) => Math.min(2.5, Math.round((prev + 0.1) * 10) / 10))}
+                        title="Zoom avant (+10%)"
+                        className="p-1 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition active:scale-95"
+                      >
+                        <ZoomIn className="w-3.5 h-3.5" />
+                      </button>
+
+                      <div className="w-px h-3.5 bg-slate-700 mx-0.5" />
+
+                      <button
+                        type="button"
+                        onClick={() => setZoom((prev) => (prev > 1.05 ? 1 : 1.3))}
+                        title={zoom > 1.05 ? "Ajuster la page (100%)" : "Agrandir (130%)"}
+                        className="p-1 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition active:scale-95 flex items-center gap-1 text-[11px]"
+                      >
+                        {zoom > 1.05 ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+
+                    {/* Canvas Stage Frame */}
+                    <div className="w-full h-full rounded-2xl bg-slate-900/60 border border-slate-800 p-2 sm:p-3 md:p-3.5 flex overflow-auto custom-scrollbar">
+                      <div
+                        className="m-auto relative shadow-2xl shadow-black/50 select-none shrink-0 transition-[width] duration-150"
+                        style={{
+                          width: `calc(max(540px, (100vh - 176px) * ${aspectRatio}) * ${zoom})`,
+                          maxWidth: zoom <= 1 ? '100%' : undefined,
+                        }}
+                      >
+                        <canvas
+                          id="studio-main-cv"
+                          ref={canvasRef}
+                          className="block w-full bg-white rounded-lg shadow-xl"
+                        />
+
+                        {/* Interactive Drawing Overlay */}
+                        <div
+                          ref={overlayRef}
+                          onPointerDown={handlePointerDown}
+                          onPointerMove={handlePointerMove}
+                          onPointerUp={handlePointerUp}
+                          className={[
+                            'absolute inset-0',
+                            activeTool ? 'cursor-crosshair' : 'cursor-default',
+                          ].join(' ')}
+                          style={{ touchAction: 'none' }}
+                        >
+                          {/* Rendered Items on Overlay */}
+                          {currentPage?.items?.map((it) => {
+                            const def = TOOL_DEFS[it.type];
+                            const col = it.color || def?.c || '#6366f1';
+                            const isSelected = it.id === selectedItemId;
+
+                            // Special Arrow rendering
+                            if (it.type === 'arrow' && it.startX !== undefined && it.endX !== undefined) {
+                              const sx = it.startX * 100;
+                              const sy = it.startY! * 100;
+                              const ex = it.endX * 100;
+                              const ey = it.endY! * 100;
+                              const tolPct = (it.tolerance || 0.06) * 100;
+                              return (
+                                <div key={it.id} className="absolute inset-0 pointer-events-none">
+                                  <svg className="w-full h-full overflow-visible">
+                                    <defs>
+                                      <marker
+                                        id={`studio-arrow-head-${it.id}`}
+                                        markerWidth="6"
+                                        markerHeight="6"
+                                        refX="5"
+                                        refY="2.5"
+                                        orient="auto"
+                                      >
+                                        <path d="M0,0.5 L0,4.5 L5,2.5 z" fill={isSelected ? '#38bdf8' : col} />
+                                      </marker>
+                                    </defs>
+                                    {/* Tolerance radius preview on selection */}
+                                    {isSelected && (
+                                      <>
+                                        <circle
+                                          cx={`${sx}%`}
+                                          cy={`${sy}%`}
+                                          r={`${tolPct}%`}
+                                          fill="#06b6d418"
+                                          stroke="#06b6d4"
+                                          strokeWidth="1.5"
+                                          strokeDasharray="3,3"
+                                        />
+                                        <circle
+                                          cx={`${ex}%`}
+                                          cy={`${ey}%`}
+                                          r={`${tolPct}%`}
+                                          fill="#06b6d418"
+                                          stroke="#06b6d4"
+                                          strokeWidth="1.5"
+                                          strokeDasharray="3,3"
+                                        />
+                                      </>
+                                    )}
+                                    {/* Directed Arrow Line */}
+                                    <line
+                                      x1={`${sx}%`}
+                                      y1={`${sy}%`}
+                                      x2={`${ex}%`}
+                                      y2={`${ey}%`}
+                                      stroke={isSelected ? '#38bdf8' : col}
+                                      strokeWidth={isSelected ? '2' : '1.5'}
+                                      markerEnd={`url(#studio-arrow-head-${it.id})`}
+                                    />
+                                    {/* Start & End Anchor Dots */}
+                                    <circle cx={`${sx}%`} cy={`${sy}%`} r="2.5" fill="#22c55e" stroke="#ffffff" strokeWidth="1" />
+                                    <circle cx={`${ex}%`} cy={`${ey}%`} r="2.5" fill="#ef4444" stroke="#ffffff" strokeWidth="1" />
+                                  </svg>
+                                  <span
+                                    className="absolute font-bold text-[10px] px-1.5 py-0.5 rounded shadow text-white pointer-events-none whitespace-nowrap"
+                                    style={{
+                                      left: `${(sx + ex) / 2}%`,
+                                      top: `${(sy + ey) / 2}%`,
+                                      transform: 'translate(-50%, -100%)',
+                                      backgroundColor: isSelected ? '#0284c7' : col,
+                                    }}
+                                  >
+                                    {it.label || 'Flèche'} {it.bidirectional ? '↔' : '→'}
+                                  </span>
+                                </div>
+                              );
+                            }
+
+                            // Special Choice Zone rendering
+                            if (it.type === 'choice') {
+                              return (
+                                <div
+                                  key={it.id}
+                                  className="absolute pointer-events-none transition-all"
                                   style={{
-                                    left: `${(sx + ex) / 2}%`,
-                                    top: `${(sy + ey) / 2}%`,
-                                    transform: 'translate(-50%, -100%)',
-                                    backgroundColor: isSelected ? '#0284c7' : col,
+                                    left: `${it.x * 100}%`,
+                                    top: `${it.y * 100}%`,
+                                    width: `${it.w * 100}%`,
+                                    height: `${it.h * 100}%`,
+                                    backgroundColor: isSelected
+                                      ? 'rgba(16, 185, 129, 0.35)'
+                                      : it.isCorrect
+                                        ? 'rgba(16, 185, 129, 0.2)'
+                                        : 'rgba(239, 68, 68, 0.15)',
+                                    border: isSelected
+                                      ? '2px solid #34d399'
+                                      : it.isCorrect
+                                        ? '2px dashed #10b981'
+                                        : '2px dashed #ef4444',
+                                    outline: isSelected ? '2px dashed #ffffff' : undefined,
                                   }}
                                 >
-                                  {it.label || 'Flèche'} {it.bidirectional ? '↔' : '→'}
-                                </span>
-                              </div>
-                            );
-                          }
-
-                          // Special Choice Zone rendering
-                          if (it.type === 'choice') {
-                            return (
-                              <div
-                                key={it.id}
-                                className="absolute pointer-events-none transition-all"
-                                style={{
-                                  left: `${it.x * 100}%`,
-                                  top: `${it.y * 100}%`,
-                                  width: `${it.w * 100}%`,
-                                  height: `${it.h * 100}%`,
-                                  backgroundColor: isSelected
-                                    ? 'rgba(16, 185, 129, 0.35)'
-                                    : it.isCorrect
-                                    ? 'rgba(16, 185, 129, 0.2)'
-                                    : 'rgba(239, 68, 68, 0.15)',
-                                  border: isSelected
-                                    ? '2px solid #34d399'
-                                    : it.isCorrect
-                                    ? '2px dashed #10b981'
-                                    : '2px dashed #ef4444',
-                                  outline: isSelected ? '2px dashed #ffffff' : undefined,
-                                }}
-                              >
-                                <span
-                                  className="absolute left-0 -top-4 font-bold text-[10px] px-1.5 py-0.5 rounded text-slate-900 whitespace-nowrap shadow-sm pointer-events-none flex items-center gap-1.5"
-                                  style={{ backgroundColor: it.isCorrect ? '#34d399' : '#f87171' }}
-                                >
-                                  <span className="bg-slate-900/40 text-white px-1 rounded text-[9px] font-mono">
-                                    {it.questionId || 'Q1'}
-                                  </span>
-                                  <span>{it.label || 'Option'}</span>
-                                  <span>{it.isCorrect ? '(✓ Vrai)' : '(✗ Faux)'}</span>
-                                </span>
-                              </div>
-                            );
-                          }
-
-                          // Special Circle Exercise Zone rendering
-                          if (it.type === 'circleExercise') {
-                            return (
-                              <div
-                                key={it.id}
-                                className="absolute pointer-events-none transition-all flex items-center justify-center"
-                                style={{
-                                  left: `${it.x * 100}%`,
-                                  top: `${it.y * 100}%`,
-                                  width: `${it.w * 100}%`,
-                                  height: `${it.h * 100}%`,
-                                  borderRadius: '9999px',
-                                  backgroundColor: isSelected
-                                    ? 'rgba(168, 85, 247, 0.28)'
-                                    : it.isCorrect
-                                    ? 'rgba(16, 185, 129, 0.16)'
-                                    : 'rgba(239, 68, 68, 0.14)',
-                                  border: isSelected
-                                    ? '2.5px solid #a855f7'
-                                    : it.isCorrect
-                                    ? '2px dashed #10b981'
-                                    : '2px dashed #ef4444',
-                                  outline: isSelected ? '2px dashed #ffffff' : undefined,
-                                }}
-                              >
-                                <span
-                                  className="absolute left-1/2 -top-4 -translate-x-1/2 font-bold text-[10px] px-1.5 py-0.5 rounded text-white whitespace-nowrap shadow-sm pointer-events-none flex items-center gap-1.5 z-20"
-                                  style={{ backgroundColor: it.isCorrect ? '#10b981' : '#ef4444' }}
-                                >
-                                  <span className="bg-slate-900/60 text-purple-200 px-1 rounded text-[9px] font-mono font-bold">
-                                    ⭕ {it.questionId || 'Q1'}
-                                  </span>
-                                  <span>{it.label || 'Option'}</span>
-                                  <span>{it.isCorrect ? '(✓ Vrai)' : '(✗ Faux)'}</span>
-                                </span>
-                                <svg className="w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                  <ellipse
-                                    cx="50"
-                                    cy="50"
-                                    rx="47"
-                                    ry="44"
-                                    fill="none"
-                                    stroke={isSelected ? '#c084fc' : it.isCorrect ? '#34d399' : '#f87171'}
-                                    strokeWidth="2"
-                                    strokeDasharray="4 3"
-                                  />
-                                </svg>
-                              </div>
-                            );
-                          }
-
-                          // Special Drag and Drop Exercise Zone rendering
-                          if (it.type === 'dragDrop') {
-                            const isDrag = (it.dragDropMode || 'drag') === 'drag';
-                            return (
-                              <div
-                                key={it.id}
-                                className="absolute pointer-events-none transition-all flex items-center justify-center"
-                                style={{
-                                  left: `${it.x * 100}%`,
-                                  top: `${it.y * 100}%`,
-                                  width: `${it.w * 100}%`,
-                                  height: `${it.h * 100}%`,
-                                  backgroundColor: isDrag
-                                    ? (it.maskColor || '#ffffff')
-                                    : 'rgba(6, 182, 212, 0.12)',
-                                  border: isSelected
-                                    ? (isDrag ? '2.5px solid #3b82f6' : '2.5px solid #06b6d4')
-                                    : (isDrag ? '2px solid #3b82f6' : '2px dashed #06b6d4'),
-                                  borderRadius: isDrag ? '6px' : '8px',
-                                  outline: isSelected ? '2px dashed #ffffff' : undefined,
-                                }}
-                              >
-                                {isDrag ? (
-                                  <>
-                                    {it.dragImageDataUrl && (
-                                      <img
-                                        src={it.dragImageDataUrl}
-                                        alt={it.dragId || 'Élément à glisser'}
-                                        className="w-full h-full object-contain pointer-events-none drop-shadow-sm"
-                                      />
-                                    )}
-                                    <span
-                                      className="absolute left-1/2 -top-4 -translate-x-1/2 font-bold text-[10px] px-1.5 py-0.5 rounded text-white whitespace-nowrap shadow-sm pointer-events-none flex items-center gap-1.5 z-20 bg-blue-600"
-                                    >
-                                      <span>✋ {it.dragId || 'drag'}</span>
-                                    </span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <div className="flex flex-col items-center justify-center text-cyan-400/80">
-                                      <span className="text-sm">🎯</span>
-                                      <span className="text-[9px] font-mono font-bold mt-0.5">
-                                        {it.targetDragId ? `Accepte: ${it.targetDragId}` : 'Cible'}
-                                      </span>
-                                    </div>
-                                    <span
-                                      className="absolute left-1/2 -top-4 -translate-x-1/2 font-bold text-[10px] px-1.5 py-0.5 rounded text-white whitespace-nowrap shadow-sm pointer-events-none flex items-center gap-1.5 z-20"
-                                      style={{ backgroundColor: it.targetDragId ? '#0891b2' : '#f59e0b' }}
-                                    >
-                                      <span>🎯 {it.dropId || 'drop'}</span>
-                                      <span className="text-[9px] opacity-90 font-mono">
-                                        ({it.targetDragId ? `→ ${it.targetDragId}` : 'non associé'})
-                                      </span>
-                                    </span>
-                                  </>
-                                )}
-                              </div>
-                            );
-                          }
-
-                          // Special Color the Correct Drawings rendering
-                          if (it.type === 'colorCorrect') {
-                            return (
-                              <div
-                                key={it.id}
-                                className="absolute pointer-events-none transition-all"
-                                style={{
-                                  left: `${it.x * 100}%`,
-                                  top: `${it.y * 100}%`,
-                                  width: `${it.w * 100}%`,
-                                  height: `${it.h * 100}%`,
-                                  backgroundColor: isSelected
-                                    ? 'rgba(139, 92, 246, 0.35)'
-                                    : it.isCorrect
-                                    ? 'rgba(34, 197, 94, 0.18)'
-                                    : 'rgba(239, 68, 68, 0.18)',
-                                  border: isSelected
-                                    ? '2px solid #a855f7'
-                                    : it.isCorrect
-                                    ? '2px dashed #22c55e'
-                                    : '2px dashed #ef4444',
-                                  outline: isSelected ? '2px dashed #ffffff' : undefined,
-                                }}
-                              >
-                                {it.outerContourSvg && (
-                                  <svg
-                                    viewBox="0 0 100 100"
-                                    preserveAspectRatio="none"
-                                    className="absolute inset-0 w-full h-full pointer-events-none"
+                                  <span
+                                    className="absolute left-0 -top-4 font-bold text-[10px] px-1.5 py-0.5 rounded text-slate-900 whitespace-nowrap shadow-sm pointer-events-none flex items-center gap-1.5"
+                                    style={{ backgroundColor: it.isCorrect ? '#34d399' : '#f87171' }}
                                   >
-                                    <path
-                                      d={it.outerContourSvg}
+                                    <span className="bg-slate-900/40 text-white px-1 rounded text-[9px] font-mono">
+                                      {it.questionId || 'Q1'}
+                                    </span>
+                                    <span>{it.label || 'Option'}</span>
+                                    <span>{it.isCorrect ? '(✓ Vrai)' : '(✗ Faux)'}</span>
+                                  </span>
+                                </div>
+                              );
+                            }
+
+                            // Special Circle Exercise Zone rendering
+                            if (it.type === 'circleExercise') {
+                              return (
+                                <div
+                                  key={it.id}
+                                  className="absolute pointer-events-none transition-all flex items-center justify-center"
+                                  style={{
+                                    left: `${it.x * 100}%`,
+                                    top: `${it.y * 100}%`,
+                                    width: `${it.w * 100}%`,
+                                    height: `${it.h * 100}%`,
+                                    borderRadius: '9999px',
+                                    backgroundColor: isSelected
+                                      ? 'rgba(168, 85, 247, 0.28)'
+                                      : it.isCorrect
+                                        ? 'rgba(16, 185, 129, 0.16)'
+                                        : 'rgba(239, 68, 68, 0.14)',
+                                    border: isSelected
+                                      ? '2.5px solid #a855f7'
+                                      : it.isCorrect
+                                        ? '2px dashed #10b981'
+                                        : '2px dashed #ef4444',
+                                    outline: isSelected ? '2px dashed #ffffff' : undefined,
+                                  }}
+                                >
+                                  <span
+                                    className="absolute left-1/2 -top-4 -translate-x-1/2 font-bold text-[10px] px-1.5 py-0.5 rounded text-white whitespace-nowrap shadow-sm pointer-events-none flex items-center gap-1.5 z-20"
+                                    style={{ backgroundColor: it.isCorrect ? '#10b981' : '#ef4444' }}
+                                  >
+                                    <span className="bg-slate-900/60 text-purple-200 px-1 rounded text-[9px] font-mono font-bold">
+                                      ⭕ {it.questionId || 'Q1'}
+                                    </span>
+                                    <span>{it.label || 'Option'}</span>
+                                    <span>{it.isCorrect ? '(✓ Vrai)' : '(✗ Faux)'}</span>
+                                  </span>
+                                  <svg className="w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                    <ellipse
+                                      cx="50"
+                                      cy="50"
+                                      rx="47"
+                                      ry="44"
                                       fill="none"
-                                      stroke={it.isCorrect ? '#22c55e' : '#ef4444'}
+                                      stroke={isSelected ? '#c084fc' : it.isCorrect ? '#34d399' : '#f87171'}
                                       strokeWidth="2"
-                                      strokeDasharray="2 2"
+                                      strokeDasharray="4 3"
                                     />
                                   </svg>
-                                )}
-                                <span
-                                  className="absolute left-0 -top-4 font-bold text-[10px] px-1 rounded text-slate-900 whitespace-nowrap shadow-sm pointer-events-none flex items-center gap-1"
-                                  style={{ backgroundColor: it.isCorrect ? '#4ade80' : '#f87171' }}
-                                >
-                                  <span>[{it.drawingId || 'Dessin'}]</span>
-                                  <span>{it.label}</span>
-                                  <span>{it.isCorrect ? '(✓ Correct)' : '(✗ Distracteur)'}</span>
-                                </span>
-                              </div>
-                            );
-                          }
+                                </div>
+                              );
+                            }
 
-                          // Special Free Coloring rendering
-                          if (it.type === 'freeColoring') {
-                            return (
-                              <div
-                                key={it.id}
-                                className="absolute pointer-events-none transition-all"
-                                style={{
-                                  left: `${it.x * 100}%`,
-                                  top: `${it.y * 100}%`,
-                                  width: `${it.w * 100}%`,
-                                  height: `${it.h * 100}%`,
-                                  backgroundColor: isSelected ? 'rgba(236, 72, 153, 0.25)' : 'rgba(236, 72, 153, 0.08)',
-                                  border: isSelected ? '2px solid #ec4899' : '2px dashed #ec4899',
-                                  outline: isSelected ? '2px dashed #ffffff' : undefined,
-                                }}
-                              >
-                                {it.regions && it.regions.length > 0 && (
-                                  <svg
-                                    viewBox="0 0 100 100"
-                                    preserveAspectRatio="none"
-                                    className="absolute inset-0 w-full h-full pointer-events-none"
-                                  >
-                                    {it.regions.map((reg) => (
+                            // Special Drag and Drop Exercise Zone rendering
+                            if (it.type === 'dragDrop') {
+                              const isDrag = (it.dragDropMode || 'drag') === 'drag';
+                              return (
+                                <div
+                                  key={it.id}
+                                  className="absolute pointer-events-none transition-all flex items-center justify-center"
+                                  style={{
+                                    left: `${it.x * 100}%`,
+                                    top: `${it.y * 100}%`,
+                                    width: `${it.w * 100}%`,
+                                    height: `${it.h * 100}%`,
+                                    backgroundColor: isDrag
+                                      ? (it.maskColor || '#ffffff')
+                                      : 'rgba(6, 182, 212, 0.12)',
+                                    border: isSelected
+                                      ? (isDrag ? '2.5px solid #3b82f6' : '2.5px solid #06b6d4')
+                                      : (isDrag ? '2px solid #3b82f6' : '2px dashed #06b6d4'),
+                                    borderRadius: isDrag ? '6px' : '8px',
+                                    outline: isSelected ? '2px dashed #ffffff' : undefined,
+                                  }}
+                                >
+                                  {isDrag ? (
+                                    <>
+                                      {it.dragImageDataUrl && (
+                                        <img
+                                          src={it.dragImageDataUrl}
+                                          alt={it.dragId || 'Élément à glisser'}
+                                          className="w-full h-full object-contain pointer-events-none drop-shadow-sm"
+                                        />
+                                      )}
+                                      <span
+                                        className="absolute left-1/2 -top-4 -translate-x-1/2 font-bold text-[10px] px-1.5 py-0.5 rounded text-white whitespace-nowrap shadow-sm pointer-events-none flex items-center gap-1.5 z-20 bg-blue-600"
+                                      >
+                                        <span>✋ {it.dragId || 'drag'}</span>
+                                      </span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <div className="flex flex-col items-center justify-center text-cyan-400/80">
+                                        <span className="text-sm">🎯</span>
+                                        <span className="text-[9px] font-mono font-bold mt-0.5">
+                                          {it.targetDragId ? `Accepte: ${it.targetDragId}` : 'Cible'}
+                                        </span>
+                                      </div>
+                                      <span
+                                        className="absolute left-1/2 -top-4 -translate-x-1/2 font-bold text-[10px] px-1.5 py-0.5 rounded text-white whitespace-nowrap shadow-sm pointer-events-none flex items-center gap-1.5 z-20"
+                                        style={{ backgroundColor: it.targetDragId ? '#0891b2' : '#f59e0b' }}
+                                      >
+                                        <span>🎯 {it.dropId || 'drop'}</span>
+                                        <span className="text-[9px] opacity-90 font-mono">
+                                          ({it.targetDragId ? `→ ${it.targetDragId}` : 'non associé'})
+                                        </span>
+                                      </span>
+                                    </>
+                                  )}
+                                </div>
+                              );
+                            }
+
+                            // Special Color the Correct Drawings rendering
+                            if (it.type === 'colorCorrect') {
+                              return (
+                                <div
+                                  key={it.id}
+                                  className="absolute pointer-events-none transition-all"
+                                  style={{
+                                    left: `${it.x * 100}%`,
+                                    top: `${it.y * 100}%`,
+                                    width: `${it.w * 100}%`,
+                                    height: `${it.h * 100}%`,
+                                    backgroundColor: isSelected
+                                      ? 'rgba(139, 92, 246, 0.35)'
+                                      : it.isCorrect
+                                        ? 'rgba(34, 197, 94, 0.18)'
+                                        : 'rgba(239, 68, 68, 0.18)',
+                                    border: isSelected
+                                      ? '2px solid #a855f7'
+                                      : it.isCorrect
+                                        ? '2px dashed #22c55e'
+                                        : '2px dashed #ef4444',
+                                    outline: isSelected ? '2px dashed #ffffff' : undefined,
+                                  }}
+                                >
+                                  {it.outerContourSvg && (
+                                    <svg
+                                      viewBox="0 0 100 100"
+                                      preserveAspectRatio="none"
+                                      className="absolute inset-0 w-full h-full pointer-events-none"
+                                    >
                                       <path
-                                        key={reg.id}
-                                        d={reg.pathD}
-                                        fill="rgba(236, 72, 153, 0.12)"
-                                        stroke="#ec4899"
-                                        strokeWidth="1"
+                                        d={it.outerContourSvg}
+                                        fill="none"
+                                        stroke={it.isCorrect ? '#22c55e' : '#ef4444'}
+                                        strokeWidth="2"
+                                        strokeDasharray="2 2"
                                       />
-                                    ))}
-                                  </svg>
-                                )}
-                                <span
-                                  className="absolute left-0 -top-4 font-bold text-[10px] px-1.5 py-0.5 rounded text-white bg-pink-600 whitespace-nowrap shadow-sm pointer-events-none flex items-center gap-1"
-                                >
-                                  <span>🎨 Coloriage libre : {it.label || 'Illustration'} ({it.regions?.length || 0} zones)</span>
-                                </span>
-                              </div>
-                            );
-                          }
-
-                          // Special Highlight (Surligner) rendering — transparent overlay preserving printed text
-                          if (it.type === 'highlight') {
-                            return (
-                              <div
-                                key={it.id}
-                                className="absolute pointer-events-none transition-all"
-                                style={{
-                                  left: `${it.x * 100}%`,
-                                  top: `${it.y * 100}%`,
-                                  width: `${it.w * 100}%`,
-                                  height: `${it.h * 100}%`,
-                                  backgroundColor: it.color || '#facc15',
-                                  opacity: isSelected ? 0.55 : 0.38,
-                                  mixBlendMode: 'multiply',
-                                  border: isSelected ? '1.5px solid #ca8a04' : undefined,
-                                  outline: isSelected ? '1px dashed #ffffff' : undefined,
-                                  borderRadius: '3px',
-                                }}
-                              >
-                                <span
-                                  className="absolute left-0 -top-4 font-bold text-[10px] px-1 rounded text-slate-900 whitespace-nowrap shadow-sm pointer-events-none"
-                                  style={{ backgroundColor: '#facc15' }}
-                                >
-                                  Surligner {it.note ? `(${it.note})` : ''}
-                                </span>
-                              </div>
-                            );
-                          }
-
-                          // Special Checkbox (Case à cocher) rendering
-                          if (it.type === 'check') {
-                            return (
-                              <div
-                                key={it.id}
-                                className="absolute pointer-events-none transition-all flex items-center justify-center"
-                                style={{
-                                  left: `${it.x * 100}%`,
-                                  top: `${it.y * 100}%`,
-                                  width: `${it.w * 100}%`,
-                                  height: `${it.h * 100}%`,
-                                  border: isSelected ? '2px solid #2dd4bf' : '2px dashed #0d9488',
-                                  outline: isSelected ? '2px dashed #ffffff' : undefined,
-                                  backgroundColor: isSelected ? 'rgba(45, 212, 191, 0.25)' : 'rgba(45, 212, 191, 0.12)',
-                                  borderRadius: '4px',
-                                }}
-                              >
-                                <span className="font-bold text-teal-600 select-none text-xs">
-                                  ✓
-                                </span>
-                                {it.label && (
-                                  <span className="absolute left-[105%] whitespace-nowrap text-[10px] font-semibold text-slate-900 bg-white/90 px-1 py-0.5 rounded shadow">
-                                    {it.label}
+                                    </svg>
+                                  )}
+                                  <span
+                                    className="absolute left-0 -top-4 font-bold text-[10px] px-1 rounded text-slate-900 whitespace-nowrap shadow-sm pointer-events-none flex items-center gap-1"
+                                    style={{ backgroundColor: it.isCorrect ? '#4ade80' : '#f87171' }}
+                                  >
+                                    <span>[{it.drawingId || 'Dessin'}]</span>
+                                    <span>{it.label}</span>
+                                    <span>{it.isCorrect ? '(✓ Correct)' : '(✗ Distracteur)'}</span>
                                   </span>
-                                )}
-                                <span
-                                  className="absolute left-0 -top-4 font-bold text-[10px] px-1 rounded text-slate-900 whitespace-nowrap shadow-sm pointer-events-none"
-                                  style={{ backgroundColor: '#2dd4bf' }}
-                                >
-                                  Case à cocher {it.correct ? '(attendue)' : ''}
-                                </span>
-                              </div>
-                            );
-                          }
+                                </div>
+                              );
+                            }
 
-                          // Standard/Lasso/Paint items rendering
-                          const isPaint = it.type === 'paint';
-                          return (
-                            <div
-                              key={it.id}
-                              className="absolute pointer-events-none"
-                              style={{
-                                left: `${it.x * 100}%`,
-                                top: `${it.y * 100}%`,
-                                width: `${it.w * 100}%`,
-                                height: `${it.h * 100}%`,
-                              }}
-                            >
+                            // Special Free Coloring rendering
+                            if (it.type === 'freeColoring') {
+                              return (
+                                <div
+                                  key={it.id}
+                                  className="absolute pointer-events-none transition-all"
+                                  style={{
+                                    left: `${it.x * 100}%`,
+                                    top: `${it.y * 100}%`,
+                                    width: `${it.w * 100}%`,
+                                    height: `${it.h * 100}%`,
+                                    backgroundColor: isSelected ? 'rgba(236, 72, 153, 0.25)' : 'rgba(236, 72, 153, 0.08)',
+                                    border: isSelected ? '2px solid #ec4899' : '2px dashed #ec4899',
+                                    outline: isSelected ? '2px dashed #ffffff' : undefined,
+                                  }}
+                                >
+                                  {it.regions && it.regions.length > 0 && (
+                                    <svg
+                                      viewBox="0 0 100 100"
+                                      preserveAspectRatio="none"
+                                      className="absolute inset-0 w-full h-full pointer-events-none"
+                                    >
+                                      {it.regions.map((reg) => (
+                                        <path
+                                          key={reg.id}
+                                          d={reg.pathD}
+                                          fill="rgba(236, 72, 153, 0.12)"
+                                          stroke="#ec4899"
+                                          strokeWidth="1"
+                                        />
+                                      ))}
+                                    </svg>
+                                  )}
+                                  <span
+                                    className="absolute left-0 -top-4 font-bold text-[10px] px-1.5 py-0.5 rounded text-white bg-pink-600 whitespace-nowrap shadow-sm pointer-events-none flex items-center gap-1"
+                                  >
+                                    <span>🎨 Coloriage libre : {it.label || 'Illustration'} ({it.regions?.length || 0} zones)</span>
+                                  </span>
+                                </div>
+                              );
+                            }
+
+                            // Special Highlight (Surligner) rendering — transparent overlay preserving printed text
+                            if (it.type === 'highlight') {
+                              return (
+                                <div
+                                  key={it.id}
+                                  className="absolute pointer-events-none transition-all"
+                                  style={{
+                                    left: `${it.x * 100}%`,
+                                    top: `${it.y * 100}%`,
+                                    width: `${it.w * 100}%`,
+                                    height: `${it.h * 100}%`,
+                                    backgroundColor: it.color || '#facc15',
+                                    opacity: isSelected ? 0.55 : 0.38,
+                                    mixBlendMode: 'multiply',
+                                    border: isSelected ? '1.5px solid #ca8a04' : undefined,
+                                    outline: isSelected ? '1px dashed #ffffff' : undefined,
+                                    borderRadius: '3px',
+                                  }}
+                                >
+                                  <span
+                                    className="absolute left-0 -top-4 font-bold text-[10px] px-1 rounded text-slate-900 whitespace-nowrap shadow-sm pointer-events-none"
+                                    style={{ backgroundColor: '#facc15' }}
+                                  >
+                                    Surligner {it.note ? `(${it.note})` : ''}
+                                  </span>
+                                </div>
+                              );
+                            }
+
+                            // Special Checkbox (Case à cocher) rendering
+                            if (it.type === 'check') {
+                              return (
+                                <div
+                                  key={it.id}
+                                  className="absolute pointer-events-none transition-all flex items-center justify-center"
+                                  style={{
+                                    left: `${it.x * 100}%`,
+                                    top: `${it.y * 100}%`,
+                                    width: `${it.w * 100}%`,
+                                    height: `${it.h * 100}%`,
+                                    border: isSelected ? '2px solid #2dd4bf' : '2px dashed #0d9488',
+                                    outline: isSelected ? '2px dashed #ffffff' : undefined,
+                                    backgroundColor: isSelected ? 'rgba(45, 212, 191, 0.25)' : 'rgba(45, 212, 191, 0.12)',
+                                    borderRadius: '4px',
+                                  }}
+                                >
+                                  <span className="font-bold text-teal-600 select-none text-xs">
+                                    ✓
+                                  </span>
+                                  {it.label && (
+                                    <span className="absolute left-[105%] whitespace-nowrap text-[10px] font-semibold text-slate-900 bg-white/90 px-1 py-0.5 rounded shadow">
+                                      {it.label}
+                                    </span>
+                                  )}
+                                  <span
+                                    className="absolute left-0 -top-4 font-bold text-[10px] px-1 rounded text-slate-900 whitespace-nowrap shadow-sm pointer-events-none"
+                                    style={{ backgroundColor: '#2dd4bf' }}
+                                  >
+                                    Case à cocher {it.correct ? '(attendue)' : ''}
+                                  </span>
+                                </div>
+                              );
+                            }
+
+                            // Standard/Lasso/Paint items rendering
+                            const isPaint = it.type === 'paint';
+                            return (
                               <div
-                                className="absolute inset-0 transition-all"
+                                key={it.id}
+                                className="absolute pointer-events-none"
                                 style={{
-                                  backgroundColor: `${col}${isSelected ? '88' : '44'}`,
-                                  border:
-                                    it.type !== 'lasso' && !it.pts
-                                      ? `2px solid ${col}`
-                                      : undefined,
-                                  outline:
-                                    isSelected && !it.pts
-                                      ? '2px dashed #ffffff'
-                                      : undefined,
-                                  clipPath:
-                                    it.pts
-                                      ? `polygon(${it.pts
+                                  left: `${it.x * 100}%`,
+                                  top: `${it.y * 100}%`,
+                                  width: `${it.w * 100}%`,
+                                  height: `${it.h * 100}%`,
+                                }}
+                              >
+                                <div
+                                  className="absolute inset-0 transition-all"
+                                  style={{
+                                    backgroundColor: `${col}${isSelected ? '88' : '44'}`,
+                                    border:
+                                      it.type !== 'lasso' && !it.pts
+                                        ? `2px solid ${col}`
+                                        : undefined,
+                                    outline:
+                                      isSelected && !it.pts
+                                        ? '2px dashed #ffffff'
+                                        : undefined,
+                                    clipPath:
+                                      it.pts
+                                        ? `polygon(${it.pts
                                           .map((q) => `${q[0]}% ${q[1]}%`)
                                           .join(',')})`
-                                      : undefined,
-                                }}
-                              />
-                              <span
-                                className="absolute left-0 -top-4 font-bold text-[10px] px-1 rounded text-slate-900 whitespace-nowrap shadow-sm pointer-events-none"
-                                style={{ backgroundColor: col }}
-                              >
-                                {isPaint ? `🎨 ${it.label || 'Zone Peinture'}` : def?.n}
-                              </span>
-                            </div>
-                          );
-                        })}
+                                        : undefined,
+                                  }}
+                                />
+                                <span
+                                  className="absolute left-0 -top-4 font-bold text-[10px] px-1 rounded text-slate-900 whitespace-nowrap shadow-sm pointer-events-none"
+                                  style={{ backgroundColor: col }}
+                                >
+                                  {isPaint ? `🎨 ${it.label || 'Zone Peinture'}` : def?.n}
+                                </span>
+                              </div>
+                            );
+                          })}
 
-                        {/* Rectangle Drag Draft */}
-                        {draftRect && activeTool && (
-                          <div
-                            className="absolute pointer-events-none border-2 border-dashed"
-                            style={{
-                              left: `${draftRect.x * 100}%`,
-                              top: `${draftRect.y * 100}%`,
-                              width: `${draftRect.w * 100}%`,
-                              height: `${draftRect.h * 100}%`,
-                              borderColor: TOOL_DEFS[activeTool].c,
-                              backgroundColor: `${TOOL_DEFS[activeTool].c}33`,
-                            }}
-                          />
-                        )}
-
-                        {/* Lasso Drag Draft */}
-                        {draftLasso && activeTool && (
-                          <div
-                            className="absolute inset-0 pointer-events-none"
-                            style={{
-                              backgroundColor: `${TOOL_DEFS[activeTool].c}44`,
-                              clipPath: `polygon(${draftLasso
-                                .map((q) => `${q[0] * 100}% ${q[1] * 100}%`)
-                                .join(',')})`,
-                            }}
-                          />
-                        )}
-
-                        {/* Arrow Drag Draft */}
-                        {draftArrow && activeTool && (
-                          <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible">
-                            <defs>
-                              <marker
-                                id="draft-arrow-head"
-                                markerWidth="6"
-                                markerHeight="6"
-                                refX="5"
-                                refY="2.5"
-                                orient="auto"
-                              >
-                                <path d="M0,0.5 L0,4.5 L5,2.5 z" fill="#06b6d4" />
-                              </marker>
-                            </defs>
-                            <line
-                              x1={`${draftArrow.x1 * 100}%`}
-                              y1={`${draftArrow.y1 * 100}%`}
-                              x2={`${draftArrow.x2 * 100}%`}
-                              y2={`${draftArrow.y2 * 100}%`}
-                              stroke="#06b6d4"
-                              strokeWidth="1.8"
-                              strokeDasharray="4,4"
-                              markerEnd="url(#draft-arrow-head)"
+                          {/* Rectangle Drag Draft */}
+                          {draftRect && activeTool && (
+                            <div
+                              className="absolute pointer-events-none border-2 border-dashed"
+                              style={{
+                                left: `${draftRect.x * 100}%`,
+                                top: `${draftRect.y * 100}%`,
+                                width: `${draftRect.w * 100}%`,
+                                height: `${draftRect.h * 100}%`,
+                                borderColor: TOOL_DEFS[activeTool].c,
+                                backgroundColor: `${TOOL_DEFS[activeTool].c}33`,
+                              }}
                             />
-                            <circle cx={`${draftArrow.x1 * 100}%`} cy={`${draftArrow.y1 * 100}%`} r="2.5" fill="#22c55e" stroke="#fff" strokeWidth="1" />
-                            <circle cx={`${draftArrow.x2 * 100}%`} cy={`${draftArrow.y2 * 100}%`} r="2.5" fill="#06b6d4" stroke="#fff" strokeWidth="1" />
-                          </svg>
-                        )}
-                      </div>
+                          )}
 
-                      {/* Selected Text Floating Action Badge for "Sélectionner" tool (Rendered OUTSIDE overlayRef to guarantee full clickability) */}
-                      {selectedTextInfo && (
-                        <div
-                          className="absolute inset-0 pointer-events-none z-40 overflow-visible"
-                          onPointerDown={(e) => e.stopPropagation()}
-                          onPointerUp={(e) => e.stopPropagation()}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {/* Selection bounding box */}
-                          <div
-                            className="absolute border-2 border-dashed border-sky-400 bg-sky-400/20 rounded shadow-md pointer-events-none transition-all"
-                            style={{
-                              left: `${selectedTextInfo.rect.x * 100}%`,
-                              top: `${selectedTextInfo.rect.y * 100}%`,
-                              width: `${selectedTextInfo.rect.w * 100}%`,
-                              height: `${selectedTextInfo.rect.h * 100}%`,
-                            }}
-                          />
+                          {/* Lasso Drag Draft */}
+                          {draftLasso && activeTool && (
+                            <div
+                              className="absolute inset-0 pointer-events-none"
+                              style={{
+                                backgroundColor: `${TOOL_DEFS[activeTool].c}44`,
+                                clipPath: `polygon(${draftLasso
+                                  .map((q) => `${q[0] * 100}% ${q[1] * 100}%`)
+                                  .join(',')})`,
+                              }}
+                            />
+                          )}
 
-                          {/* Floating Options Bar */}
+                          {/* Arrow Drag Draft */}
+                          {draftArrow && activeTool && (
+                            <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible">
+                              <defs>
+                                <marker
+                                  id="draft-arrow-head"
+                                  markerWidth="6"
+                                  markerHeight="6"
+                                  refX="5"
+                                  refY="2.5"
+                                  orient="auto"
+                                >
+                                  <path d="M0,0.5 L0,4.5 L5,2.5 z" fill="#06b6d4" />
+                                </marker>
+                              </defs>
+                              <line
+                                x1={`${draftArrow.x1 * 100}%`}
+                                y1={`${draftArrow.y1 * 100}%`}
+                                x2={`${draftArrow.x2 * 100}%`}
+                                y2={`${draftArrow.y2 * 100}%`}
+                                stroke="#06b6d4"
+                                strokeWidth="1.8"
+                                strokeDasharray="4,4"
+                                markerEnd="url(#draft-arrow-head)"
+                              />
+                              <circle cx={`${draftArrow.x1 * 100}%`} cy={`${draftArrow.y1 * 100}%`} r="2.5" fill="#22c55e" stroke="#fff" strokeWidth="1" />
+                              <circle cx={`${draftArrow.x2 * 100}%`} cy={`${draftArrow.y2 * 100}%`} r="2.5" fill="#06b6d4" stroke="#fff" strokeWidth="1" />
+                            </svg>
+                          )}
+                        </div>
+
+                        {/* Selected Text Floating Action Badge for "Sélectionner" tool (Rendered OUTSIDE overlayRef to guarantee full clickability) */}
+                        {selectedTextInfo && (
                           <div
-                            className="absolute pointer-events-auto flex items-center gap-1.5 p-1.5 rounded-xl bg-slate-900/95 border border-sky-500/60 shadow-2xl backdrop-blur-md text-xs whitespace-nowrap z-50 text-slate-200"
-                            style={{
-                              left: `${Math.max(1, Math.min(60, selectedTextInfo.rect.x * 100))}%`,
-                              ...(selectedTextInfo.rect.y < 0.14
-                                ? { top: `${(selectedTextInfo.rect.y + selectedTextInfo.rect.h) * 100}%`, marginTop: '8px' }
-                                : { bottom: `${(1 - selectedTextInfo.rect.y) * 100}%`, marginBottom: '8px' }),
-                            }}
+                            className="absolute inset-0 pointer-events-none z-40 overflow-visible"
                             onPointerDown={(e) => e.stopPropagation()}
                             onPointerUp={(e) => e.stopPropagation()}
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <input
-                              type="text"
-                              readOnly
-                              value={selectedTextInfo.text}
-                              className="max-w-[160px] sm:max-w-[240px] px-2 py-1 font-mono text-[11px] text-sky-200 bg-sky-950/70 rounded-lg border border-sky-800/60 select-all cursor-text focus:outline-none"
-                              title={selectedTextInfo.text}
-                              onFocus={(e) => e.target.select()}
+                            {/* Selection bounding box */}
+                            <div
+                              className="absolute border-2 border-dashed border-sky-400 bg-sky-400/20 rounded shadow-md pointer-events-none transition-all"
+                              style={{
+                                left: `${selectedTextInfo.rect.x * 100}%`,
+                                top: `${selectedTextInfo.rect.y * 100}%`,
+                                width: `${selectedTextInfo.rect.w * 100}%`,
+                                height: `${selectedTextInfo.rect.h * 100}%`,
+                              }}
                             />
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigator.clipboard.writeText(selectedTextInfo.text).catch(() => {});
-                                setHasCopiedText(true);
-                                showToast('Texte copié dans le presse-papier !');
-                                setTimeout(() => setHasCopiedText(false), 2000);
+
+                            {/* Floating Options Bar */}
+                            <div
+                              className="absolute pointer-events-auto flex items-center gap-1.5 p-1.5 rounded-xl bg-slate-900/95 border border-sky-500/60 shadow-2xl backdrop-blur-md text-xs whitespace-nowrap z-50 text-slate-200"
+                              style={{
+                                left: `${Math.max(1, Math.min(60, selectedTextInfo.rect.x * 100))}%`,
+                                ...(selectedTextInfo.rect.y < 0.14
+                                  ? { top: `${(selectedTextInfo.rect.y + selectedTextInfo.rect.h) * 100}%`, marginTop: '8px' }
+                                  : { bottom: `${(1 - selectedTextInfo.rect.y) * 100}%`, marginBottom: '8px' }),
                               }}
-                              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-semibold shadow transition text-[11px] active:scale-95"
-                              title="Copier le texte sélectionné"
+                              onPointerDown={(e) => e.stopPropagation()}
+                              onPointerUp={(e) => e.stopPropagation()}
+                              onClick={(e) => e.stopPropagation()}
                             >
-                              {hasCopiedText ? (
-                                <>
-                                  <Check className="w-3.5 h-3.5 text-emerald-300" />
-                                  <span className="text-emerald-200 font-bold">Copié !</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Copy className="w-3.5 h-3.5" />
-                                  <span>Copier</span>
-                                </>
-                              )}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const text = selectedTextInfo.text.trim();
-                                if (!text) return;
-                                const newItem: InteractiveItem = {
-                                  id: genId(),
-                                  type: 'tts',
-                                  x: selectedTextInfo.rect.x,
-                                  y: selectedTextInfo.rect.y,
-                                  w: Math.max(0.04, selectedTextInfo.rect.w),
-                                  h: Math.max(0.03, selectedTextInfo.rect.h),
-                                  text,
-                                  lang: /[\u0600-\u06FF]/.test(text) ? 'ar-SA' : 'fr-FR',
-                                  rate: 1,
-                                };
-                                setPages((prev) =>
-                                  prev.map((p, i) =>
-                                    i === currentPageIndex ? { ...p, items: [...p.items, newItem] } : p
-                                  )
-                                );
-                                setSelectedItemId(newItem.id);
-                                setSelectedTextInfo(null);
-                                showToast('Zone TTS créée avec le texte sélectionné !');
-                              }}
-                              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-600/50 hover:bg-indigo-600/80 border border-indigo-500/60 text-indigo-100 font-semibold shadow transition text-[11px] active:scale-95"
-                              title="Créer une zone TTS à partir de ce texte"
-                            >
-                              <Volume2 className="w-3.5 h-3.5" />
-                              <span>Créer TTS</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const text = selectedTextInfo.text.trim();
-                                const newItem: InteractiveItem = {
-                                  id: genId(),
-                                  type: 'highlight',
-                                  x: selectedTextInfo.rect.x,
-                                  y: selectedTextInfo.rect.y,
-                                  w: Math.max(0.04, selectedTextInfo.rect.w),
-                                  h: Math.max(0.02, selectedTextInfo.rect.h),
-                                  color: '#facc15',
-                                  note: text.slice(0, 40),
-                                };
-                                setPages((prev) =>
-                                  prev.map((p, i) =>
-                                    i === currentPageIndex ? { ...p, items: [...p.items, newItem] } : p
-                                  )
-                                );
-                                setSelectedItemId(newItem.id);
-                                setSelectedTextInfo(null);
-                                showToast('Surlignage créé sur ce texte !');
-                              }}
-                              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-yellow-500/30 hover:bg-yellow-500/50 border border-yellow-500/50 text-yellow-100 font-semibold shadow transition text-[11px] active:scale-95"
-                              title="Créer un surlignage sur cette zone"
-                            >
-                              <Highlighter className="w-3.5 h-3.5" />
-                              <span>Surligner</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedTextInfo(null);
-                              }}
-                              className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition active:scale-95"
-                              title="Fermer la sélection"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
+                              <input
+                                type="text"
+                                readOnly
+                                value={selectedTextInfo.text}
+                                className="max-w-[160px] sm:max-w-[240px] px-2 py-1 font-mono text-[11px] text-sky-200 bg-sky-950/70 rounded-lg border border-sky-800/60 select-all cursor-text focus:outline-none"
+                                title={selectedTextInfo.text}
+                                onFocus={(e) => e.target.select()}
+                              />
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigator.clipboard.writeText(selectedTextInfo.text).catch(() => { });
+                                  setHasCopiedText(true);
+                                  showToast('Texte copié dans le presse-papier !');
+                                  setTimeout(() => setHasCopiedText(false), 2000);
+                                }}
+                                className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-semibold shadow transition text-[11px] active:scale-95"
+                                title="Copier le texte sélectionné"
+                              >
+                                {hasCopiedText ? (
+                                  <>
+                                    <Check className="w-3.5 h-3.5 text-emerald-300" />
+                                    <span className="text-emerald-200 font-bold">Copié !</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy className="w-3.5 h-3.5" />
+                                    <span>Copier</span>
+                                  </>
+                                )}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const text = selectedTextInfo.text.trim();
+                                  if (!text) return;
+                                  const newItem: InteractiveItem = {
+                                    id: genId(),
+                                    type: 'tts',
+                                    x: selectedTextInfo.rect.x,
+                                    y: selectedTextInfo.rect.y,
+                                    w: Math.max(0.04, selectedTextInfo.rect.w),
+                                    h: Math.max(0.03, selectedTextInfo.rect.h),
+                                    text,
+                                    lang: /[\u0600-\u06FF]/.test(text) ? 'ar-SA' : 'fr-FR',
+                                    rate: 1,
+                                  };
+                                  setPages((prev) =>
+                                    prev.map((p, i) =>
+                                      i === currentPageIndex ? { ...p, items: [...p.items, newItem] } : p
+                                    )
+                                  );
+                                  setSelectedItemId(newItem.id);
+                                  setSelectedTextInfo(null);
+                                  showToast('Zone TTS créée avec le texte sélectionné !');
+                                }}
+                                className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-600/50 hover:bg-indigo-600/80 border border-indigo-500/60 text-indigo-100 font-semibold shadow transition text-[11px] active:scale-95"
+                                title="Créer une zone TTS à partir de ce texte"
+                              >
+                                <Volume2 className="w-3.5 h-3.5" />
+                                <span>Créer TTS</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const text = selectedTextInfo.text.trim();
+                                  const newItem: InteractiveItem = {
+                                    id: genId(),
+                                    type: 'highlight',
+                                    x: selectedTextInfo.rect.x,
+                                    y: selectedTextInfo.rect.y,
+                                    w: Math.max(0.04, selectedTextInfo.rect.w),
+                                    h: Math.max(0.02, selectedTextInfo.rect.h),
+                                    color: '#facc15',
+                                    note: text.slice(0, 40),
+                                  };
+                                  setPages((prev) =>
+                                    prev.map((p, i) =>
+                                      i === currentPageIndex ? { ...p, items: [...p.items, newItem] } : p
+                                    )
+                                  );
+                                  setSelectedItemId(newItem.id);
+                                  setSelectedTextInfo(null);
+                                  showToast('Surlignage créé sur ce texte !');
+                                }}
+                                className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-yellow-500/30 hover:bg-yellow-500/50 border border-yellow-500/50 text-yellow-100 font-semibold shadow transition text-[11px] active:scale-95"
+                                title="Créer un surlignage sur cette zone"
+                              >
+                                <Highlighter className="w-3.5 h-3.5" />
+                                <span>Surligner</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedTextInfo(null);
+                                }}
+                                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition active:scale-95"
+                                title="Fermer la sélection"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </div>
                 </section>
 
-                {/* Right Configuration Panel */}
+                {/* 3. Right Sidebar: Propriétés de l'élément sélectionné */}
                 {currentPage && (
-                  <PageConfigPanel
-                    page={currentPage}
-                    pageNumber={currentPageIndex + 1}
-                    selectedItemId={selectedItemId}
-                    onSelectItem={setSelectedItemId}
-                    onUpdateItem={handleUpdateItem}
-                    onDeleteItem={handleDeleteItem}
-                  />
+                  <div className="min-w-0 flex flex-col h-full">
+                    <PagePropertiesSidebar
+                      page={currentPage}
+                      pageNumber={currentPageIndex + 1}
+                      selectedItemId={selectedItemId}
+                      onSelectItem={setSelectedItemId}
+                      onUpdateItem={handleUpdateItem}
+                      onDeleteItem={handleDeleteItem}
+                    />
+                  </div>
                 )}
               </div>
-
-              {/* 5. Bottom Table des Pages (Thumbnails Strip) */}
-              <PageThumbnailsStrip
-                pages={pages}
-                currentPageIndex={currentPageIndex}
-                onSelectPage={setCurrentPageIndex}
-                onDuplicatePage={handleDuplicatePage}
-                onDeletePage={handleDeletePage}
-                onAddBlankPage={handleAddBlankPage}
-                onImportPdfPages={handleImportPdfPages}
-                onReorderPages={handleReorderPages}
-                onToast={showToast}
-              />
             </>
           )}
         </main>
@@ -1828,7 +1870,7 @@ export default function StudioPageConfigView({
         {/* Footer */}
         <footer className="text-center pt-2 text-slate-500 text-xs">
           <p>
-            Flipbook Studio Pro Engine v4.2 · Compilateur HTML5 Autonome • Tous
+            Flipbook Studio Pro Engine v2 • Compilateur Web • Tous
             droits réservés &copy; 2026
           </p>
         </footer>

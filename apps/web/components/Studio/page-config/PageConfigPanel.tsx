@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Sliders, Trash2, Volume2, Pause, Play, Square, Circle, AlertTriangle, CheckCircle2, Move } from 'lucide-react';
-import { TOOL_DEFS, type StudioConfigPage, type InteractiveItem } from './types';
+import { Sliders, Trash2, Volume2, Pause, Play, Square, Circle, AlertTriangle, CheckCircle2, Move, Plus, X, ArrowLeft } from 'lucide-react';
+import { TOOL_DEFS, type StudioConfigPage, type InteractiveItem, type InteractiveToolKey } from './types';
 import DrawingContourInspector from './DrawingContourInspector';
 import { getOffscreenPageCanvas } from './pdfLoader';
 
@@ -22,6 +22,14 @@ interface Props {
   onSelectItem: (id: string | null) => void;
   onUpdateItem: (id: string, updates: Partial<InteractiveItem>) => void;
   onDeleteItem: (id: string) => void;
+  /** 'all' (défaut) = ancien rendu complet ; sinon rendu pour un onglet du sidebar. */
+  section?: 'all' | 'elements' | 'properties';
+  /** Ouvre l'onglet Widgets du sidebar. */
+  onOpenWidgetsTab?: () => void;
+  /** Active un outil de dessin (palette « + Ajouter »). */
+  onPickTool?: (key: InteractiveToolKey) => void;
+  /** Retour à l'onglet Éléments (onglet Propriétés). */
+  onBack?: () => void;
 }
 
 export default function PageConfigPanel({
@@ -31,7 +39,15 @@ export default function PageConfigPanel({
   onSelectItem,
   onUpdateItem,
   onDeleteItem,
+  section = 'all',
+  onOpenWidgetsTab,
+  onPickTool,
+  onBack,
 }: Props) {
+  const [showPalette, setShowPalette] = useState(false);
+  const isTab = section !== 'all';
+  const showList = section !== 'properties';
+  const showForm = section !== 'elements';
   const selectedItem = page.items.find((i) => i.id === selectedItemId);
 
   // TTS testing state
@@ -282,20 +298,79 @@ export default function PageConfigPanel({
   };
 
   return (
-    <aside className="rounded-2xl bg-slate-900/60 border border-slate-800 p-4 lg:max-h-[calc(60vh+90px)] overflow-y-auto custom-scrollbar flex flex-col gap-4">
+    <aside
+      className={
+        isTab
+          ? 'flex flex-col gap-4'
+          : 'rounded-2xl bg-slate-900/60 border border-slate-800 p-4 lg:max-h-[calc(60vh+90px)] overflow-y-auto custom-scrollbar flex flex-col gap-4'
+      }
+    >
       {/* Panel Header */}
+      {showList && (
       <div>
-        <h3 className="text-base font-bold text-white flex items-center gap-2">
-          <Sliders className="w-5 h-5 text-indigo-400" />
-          <span>Configuration de la page</span>
-        </h3>
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="text-base font-bold text-white flex items-center gap-2">
+            <Sliders className="w-5 h-5 text-indigo-400" />
+            <span>{isTab ? 'Éléments de la page' : 'Configuration de la page'}</span>
+          </h3>
+          {isTab && (onOpenWidgetsTab || onPickTool) && (
+            <button
+              type="button"
+              onClick={() => {
+                if (onOpenWidgetsTab) {
+                  onOpenWidgetsTab();
+                } else {
+                  setShowPalette((v) => !v);
+                }
+              }}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition active:scale-95"
+              aria-expanded={showPalette}
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Ajouter</span>
+            </button>
+          )}
+        </div>
         <p className="text-xs text-slate-400 mt-1">
           Page {pageNumber} · {page.items.length} élément{page.items.length > 1 ? 's' : ''}{' '}
           configuré{page.items.length > 1 ? 's' : ''}
         </p>
       </div>
+      )}
+
+      {/* Add-widget palette */}
+      {showList && isTab && onPickTool && showPalette && (
+        <div className="rounded-xl border border-indigo-500/30 bg-slate-950/60 p-2">
+          <p className="text-[11px] text-slate-400 px-1 pb-2">
+            Choisissez un type, puis dessinez-le directement sur la page.
+          </p>
+          <div className="grid grid-cols-2 gap-1.5">
+            {(Object.keys(TOOL_DEFS) as InteractiveToolKey[])
+              .filter((k) => !TOOL_DEFS[k].hidden && k !== 'select')
+              .map((k) => (
+                <button
+                  key={k}
+                  type="button"
+                  title={TOOL_DEFS[k].hint}
+                  onClick={() => {
+                    onPickTool(k);
+                    setShowPalette(false);
+                  }}
+                  className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-slate-900/80 border border-slate-700/70 hover:border-indigo-500 text-left text-[11px] font-semibold text-slate-200 transition"
+                >
+                  <span
+                    className="w-2.5 h-2.5 rounded-full flex-none"
+                    style={{ backgroundColor: TOOL_DEFS[k].c }}
+                  />
+                  <span className="truncate">{TOOL_DEFS[k].n}</span>
+                </button>
+              ))}
+          </div>
+        </div>
+      )}
 
       {/* Item List */}
+      {showList && (
       <div className="space-y-1.5">
         {page.items.length === 0 ? (
           <div className="text-xs text-slate-500 border border-dashed border-slate-700 rounded-xl p-4 text-center">
@@ -344,9 +419,21 @@ export default function PageConfigPanel({
           })
         )}
       </div>
+      )}
 
       {/* Item Configuration Form */}
-      <div className="border-t border-slate-800 pt-4 space-y-4">
+      {showForm && (
+      <div className={section === 'properties' ? 'space-y-4' : 'border-t border-slate-800 pt-4 space-y-4'}>
+        {section === 'properties' && onBack && (
+          <button
+            type="button"
+            onClick={onBack}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white transition"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Éléments</span>
+          </button>
+        )}
         {!selectedItem ? (
           <p className="text-xs text-slate-500 italic">
             Sélectionnez un élément pour modifier ses réglages.
@@ -1883,6 +1970,7 @@ export default function PageConfigPanel({
           </div>
         )}
       </div>
+      )}
     </aside>
   );
 }

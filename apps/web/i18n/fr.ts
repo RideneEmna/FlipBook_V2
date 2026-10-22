@@ -73,6 +73,7 @@ export type Translations = {
     lightMode: string;
     darkMode: string;
     langToggle: string;
+    installPwa: string;
   };
 };
 
@@ -83,7 +84,7 @@ export const fr: Translations = {
     subtitle: 'Configurez chaque page (textes à lire, modales HD, pistes audio) avant de compiler votre Flipbook HTML5 autonome.',
     resetBtn: 'Convertir un autre PDF',
     pagesConverted: (n: number) => `${n} pages converties avec succès.`,
-    footer: 'Flipbook Studio Pro Engine v4.2 · Compilateur HTML5 Autonome • Tous droits réservés © 2026',
+    footer: 'Flipbook Studio Pro Engine v2 • Compilateur Web • Tous droits réservés © 2026',
     stepper: {
       step1: 'Upload document PDF',
       step1Tag: 'Étape actuelle',
@@ -156,6 +157,7 @@ export const fr: Translations = {
     lightMode: 'Mode clair',
     darkMode: 'Mode sombre',
     langToggle: 'عربي',
+    installPwa: "Installer l'application (Kiosque)",
   },
 };
 

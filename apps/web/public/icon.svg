@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5" />
+      <stop offset="100%" stop-color="#7c3aed" />
+    </linearGradient>
+    <linearGradient id="pageGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f1f5f9" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4" />
+      <stop offset="100%" stop-color="#3b82f6" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#000000" flood-opacity="0.35" />
+    </filter>
+  </defs>
+
+  <!-- Background rounded squircle -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+
+  <!-- Outer Book glow/shadow -->
+  <g filter="url(#shadow)">
+    <!-- Left Page -->
+    <path d="M 100 140 Q 180 155 256 175 L 256 375 Q 180 355 100 340 Z" fill="url(#pageGrad)" />
+    
+    <!-- Right Page -->
+    <path d="M 412 140 Q 332 155 256 175 L 256 375 Q 332 355 412 340 Z" fill="#e2e8f0" />
+    
+    <!-- Spine binding -->
+    <line x1="256" y1="172" x2="256" y2="378" stroke="#cbd5e1" stroke-width="4" stroke-linecap="round" />
+
+    <!-- Turning Flip Page 3D effect -->
+    <path d="M 256 175 Q 310 120 355 130 L 355 330 Q 310 320 256 375 Z" fill="url(#accentGrad)" opacity="0.92" />
+    
+    <!-- Interactive Sparkles -->
+    <circle cx="370" cy="115" r="10" fill="#fbbf24" />
+    <path d="M 370 95 L 373 110 L 388 113 L 373 116 L 370 131 L 367 116 L 352 113 L 367 110 Z" fill="#fbbf24" />
+
+    <circle cx="135" cy="185" r="7" fill="#67e8f9" />
+    <circle cx="165" cy="225" r="5" fill="#a5b4fc" />
+  </g>
+</svg>
